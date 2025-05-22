@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { HouseholdType } from "../types";
+import { HouseholdType } from "../types/HouseholdTypes";
 
 /**
  * Indexed fields used throughout the Household model.
@@ -15,11 +15,14 @@ const familyMemberSchema = new Schema({
   birthDate: { type: Date, required: true },
 });
 
-const focalPointSchema = new Schema({
-  firstName: { type: String, required: true },
-  pictureUrl: { type: String },
-  [indexes.FOCAL_POINT_EMAIL]: { type: String, required: true },
-}, { _id: false });
+const focalPointSchema = new Schema(
+  {
+    firstName: { type: String, required: true },
+    pictureUrl: { type: String },
+    [indexes.FOCAL_POINT_EMAIL]: { type: String, required: true },
+  },
+  { _id: false }
+);
 
 const householdSchema = new Schema(
   {
@@ -76,10 +79,16 @@ householdSchema.index({ [indexes.FOCAL_POINT_EMAIL]: 1 });
 householdSchema.pre("save", async function (next) {
   if (!this.slug) {
     const familyNameSlug = this.familyName.toLowerCase().replace(/ /g, "-");
-    const emailSlug = this.focalPoint[indexes.FOCAL_POINT_EMAIL].toLowerCase().split("@")[0].replace(/[^a-z0-9]/g, "-");
+    const emailSlug = this.focalPoint[indexes.FOCAL_POINT_EMAIL]
+      .toLowerCase()
+      .split("@")[0]
+      .replace(/[^a-z0-9]/g, "-");
     this.slug = `${familyNameSlug}-${emailSlug}`;
   }
   next();
 });
 
-export const HouseholdModel = mongoose.model<HouseholdType & Document>("Household", householdSchema);
+export const HouseholdModel = mongoose.model<HouseholdType & Document>(
+  "Household",
+  householdSchema
+);

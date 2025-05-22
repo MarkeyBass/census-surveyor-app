@@ -1,5 +1,5 @@
 import express from "express";
-import { householdController } from "../controllers/households";
+import householdController from "../controllers/households";
 import { validateRequest } from "../middleware/validateRequest";
 import { householdSchema } from "../validations/householdSchema";
 

@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import householdRoutes from './routes/householdRoutes';
+import householdRoutes from './routes/households';
 
 // Load environment variables
 dotenv.config({ path: "./src/config/config.env" });
