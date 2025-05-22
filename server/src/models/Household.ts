@@ -4,9 +4,9 @@ import { HouseholdType } from "../types/HouseholdTypes";
 /**
  * Indexed fields used throughout the Household model.
  */
-const indexes = {
+const indexedFields = {
   SLUG: "slug",
-  FOCAL_POINT_EMAIL: "focalPoint.email",
+  FOCAL_POINT_EMAIL: "email",
 } as const;
 
 const familyMemberSchema = new Schema({
@@ -19,14 +19,14 @@ const focalPointSchema = new Schema(
   {
     firstName: { type: String, required: true },
     pictureUrl: { type: String },
-    [indexes.FOCAL_POINT_EMAIL]: { type: String, required: true },
+    [indexedFields.FOCAL_POINT_EMAIL]: { type: String, required: true },
   },
   { _id: false }
 );
 
 const householdSchema = new Schema(
   {
-    [indexes.SLUG]: { type: String, required: true },
+    [indexedFields.SLUG]: { type: String, required: true },
     familyName: { type: String, required: true },
     address: { type: String, required: true },
     surveyStatus: {
@@ -69,17 +69,17 @@ const householdSchema = new Schema(
  * - SLUG: Unique index for fast lookups by slug
  * - FOCAL_POINT_EMAIL: Index for searching households by focal point's email
  */
-householdSchema.index({ [indexes.SLUG]: 1 }, { unique: true });
-householdSchema.index({ [indexes.FOCAL_POINT_EMAIL]: 1 });
+householdSchema.index({ [indexedFields.SLUG]: 1 }, { unique: true });
+householdSchema.index({ [indexedFields.FOCAL_POINT_EMAIL]: 1 });
 
 /**
- * Pre-save hook to generate a unique slug if not exists
+ * Pre-validate hook to generate a unique slug
  * Combines family name and email to create a URL-friendly identifier
  */
-householdSchema.pre("save", async function (next) {
+householdSchema.pre("validate", function (next) {
   if (!this.slug) {
     const familyNameSlug = this.familyName.toLowerCase().replace(/ /g, "-");
-    const emailSlug = this.focalPoint[indexes.FOCAL_POINT_EMAIL]
+    const emailSlug = this.focalPoint[indexedFields.FOCAL_POINT_EMAIL]
       .toLowerCase()
       .split("@")[0]
       .replace(/[^a-z0-9]/g, "-");
