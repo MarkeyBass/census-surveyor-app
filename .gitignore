@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Build output
+dist/
+build/
+
+# IDE and OS files
+.DS_Store
+.idea/
+.vscode/
+
+# Reference folder
+server-ref/
+
+*.env
+todo.md
