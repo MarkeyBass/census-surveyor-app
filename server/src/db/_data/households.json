@@ -1,0 +1,112 @@
+[
+  {
+    "familyName": "Smith Family",
+    "address": "123 Main Street, Anytown, CA 90210",
+    "surveyStatus": "completed",
+    "dateSurveyed": "2024-01-15T10:30:00.000Z",
+    "focalPoint": {
+      "firstName": "John",
+      "email": "john.smith@email.com",
+      "pictureUrl": "https://example.com/photos/john-smith.jpg"
+    },
+    "familyMembers": [
+      {
+        "firstName": "John",
+        "lastName": "Smith",
+        "birthDate": "1980-05-15"
+      },
+      {
+        "firstName": "Jane",
+        "lastName": "Smith",
+        "birthDate": "1982-08-20"
+      },
+      {
+        "firstName": "Junior",
+        "lastName": "Smith",
+        "birthDate": "2010-03-10"
+      }
+    ],
+    "numberOfCars": 2,
+    "hasPets": true,
+    "numberOfPets": 2,
+    "housingType": "House",
+    "environmentalPractices": [
+      "Recycling",
+      "Composting food scraps",
+      "Using reusable shopping bags"
+    ]
+  },
+  {
+    "familyName": "Johnson Family",
+    "address": "456 Oak Avenue, Somewhere, NY 10001",
+    "surveyStatus": "pending",
+    "focalPoint": {
+      "firstName": "Sarah",
+      "email": "sarah.johnson@email.com"
+    },
+    "familyMembers": [
+      {
+        "firstName": "Sarah",
+        "lastName": "Johnson",
+        "birthDate": "1985-11-25"
+      },
+      {
+        "firstName": "Mike",
+        "lastName": "Johnson",
+        "birthDate": "1987-04-12"
+      }
+    ],
+    "numberOfCars": 1,
+    "hasPets": false,
+    "housingType": "Apartment",
+    "environmentalPractices": [
+      "Recycling",
+      "Conserving water"
+    ]
+  },
+  {
+    "familyName": "Garcia Family",
+    "address": "789 Pine Road, Elsewhere, TX 75001",
+    "surveyStatus": "completed",
+    "dateSurveyed": "2024-01-20T14:15:00.000Z",
+    "focalPoint": {
+      "firstName": "Maria",
+      "email": "maria.garcia@email.com",
+      "pictureUrl": "https://example.com/photos/maria-garcia.jpg"
+    },
+    "familyMembers": [
+      {
+        "firstName": "Maria",
+        "lastName": "Garcia",
+        "birthDate": "1978-09-30"
+      },
+      {
+        "firstName": "Carlos",
+        "lastName": "Garcia",
+        "birthDate": "1976-12-05"
+      },
+      {
+        "firstName": "Elena",
+        "lastName": "Garcia",
+        "birthDate": "2008-07-18"
+      },
+      {
+        "firstName": "Miguel",
+        "lastName": "Garcia",
+        "birthDate": "2012-02-22"
+      }
+    ],
+    "numberOfCars": 2,
+    "hasPets": true,
+    "numberOfPets": 1,
+    "housingType": "House",
+    "environmentalPractices": [
+      "Recycling",
+      "Composting food scraps",
+      "Conserving water",
+      "Reducing plastic use",
+      "Using reusable shopping bags",
+      "Participating in local environmental initiatives"
+    ]
+  }
+] 

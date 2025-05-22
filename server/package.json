@@ -8,7 +8,10 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "dev:nodemon": "nodemon --exec ts-node src/server.ts",
     "build": "tsc",
-    "test": "jest"
+    "test": "jest",
+    "seed": "ts-node src/db/seeder.ts",
+    "seed:import": "ts-node src/db/seeder.ts -i",
+    "seed:delete": "ts-node src/db/seeder.ts -d"
   },
   "dependencies": {
     "colors": "^1.4.0",

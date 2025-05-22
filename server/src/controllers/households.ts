@@ -9,7 +9,9 @@ type ApiError = {
 
 type ApiResponse<T> = T | ApiError;
 
-// Get all households
+// @desc      Get all households
+// @route     GET /api/v1/households
+// @access    Public
 const getAllHouseholds = async (req: Request, res: Response<ApiResponse<HouseholdType[]>>) => {
   try {
     const households = await HouseholdModel.find().sort({ createdAt: -1 });
@@ -22,7 +24,9 @@ const getAllHouseholds = async (req: Request, res: Response<ApiResponse<Househol
   }
 };
 
-// Get a single household by ID
+// @desc      Get single household
+// @route     GET /api/v1/households/:id
+// @access    Public
 const getHouseholdById = async (req: Request, res: Response<ApiResponse<HouseholdType>>) => {
   try {
     const household = await HouseholdModel.findById(req.params.id);
@@ -38,7 +42,9 @@ const getHouseholdById = async (req: Request, res: Response<ApiResponse<Househol
   }
 };
 
-// Create a new household
+// @desc      Create new household
+// @route     POST /api/v1/households
+// @access    Public
 const createHousehold = async (
   req: Request<{}, {}, HouseholdInputType>,
   res: Response<ApiResponse<HouseholdType>>
@@ -59,7 +65,9 @@ const createHousehold = async (
   }
 };
 
-// Update a household
+// @desc      Update household
+// @route     PUT /api/v1/households/:id
+// @access    Public
 const updateHousehold = async (
   req: Request<{ id: string }, {}, Partial<HouseholdInputType>>,
   res: Response<ApiResponse<HouseholdType>>
@@ -81,7 +89,9 @@ const updateHousehold = async (
   }
 };
 
-// Complete a survey
+// @desc      Complete household survey
+// @route     PUT /api/v1/households/:id/complete
+// @access    Public
 const completeSurvey = async (
   req: Request<{ id: string }, {}, Partial<HouseholdInputType>>,
   res: Response<ApiResponse<HouseholdType>>
@@ -108,7 +118,9 @@ const completeSurvey = async (
   }
 };
 
-// Delete a household
+// @desc      Delete household
+// @route     DELETE /api/v1/households/:id
+// @access    Public
 const deleteHousehold = async (
   req: Request<{ id: string }>,
   res: Response<ApiResponse<{ message: string }>>

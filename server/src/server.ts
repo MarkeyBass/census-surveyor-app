@@ -23,7 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 // Database connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/census-surveyor';
 mongoose.connect(MONGODB_URI)
-  .then(() => console.log(colors.bgYellow('Connected to MongoDB')))
+  .then(() => console.log(colors.inverse.underline('Connected to MongoDB')))
   .catch((error) => console.error(colors.red('MongoDB connection error:'), error));
 
 // Routes
@@ -38,5 +38,5 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 // Start server
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
-  console.log(colors.yellow.bgGreen(`Server is running on port ${PORT}...`));
+  console.log(colors.inverse.underline(`Server is running on port ${PORT}...`));
 }); 
