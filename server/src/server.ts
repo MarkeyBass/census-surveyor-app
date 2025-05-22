@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import householdRoutes from './routes/households';
+import colors from "colors";
 
 // Load environment variables
 dotenv.config({ path: "./src/config/config.env" });
@@ -22,11 +23,11 @@ app.use(express.urlencoded({ extended: true }));
 // Database connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/census-surveyor';
 mongoose.connect(MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((error) => console.error('MongoDB connection error:', error));
+  .then(() => console.log(colors.bgYellow('Connected to MongoDB')))
+  .catch((error) => console.error(colors.red('MongoDB connection error:'), error));
 
 // Routes
-app.use('/api/households', householdRoutes);
+app.use('/api/v1/households', householdRoutes);
 
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -37,5 +38,5 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 // Start server
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(colors.yellow.bgGreen(`Server is running on port ${PORT}...`));
 }); 
