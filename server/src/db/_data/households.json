@@ -29,7 +29,10 @@
     "numberOfCars": 2,
     "hasPets": true,
     "numberOfPets": 2,
-    "housingType": "House",
+    "housingType": {
+      "value": "House",
+      "customValue": null
+    },
     "environmentalPractices": [
       "Recycling",
       "Composting food scraps",
@@ -58,7 +61,10 @@
     ],
     "numberOfCars": 1,
     "hasPets": false,
-    "housingType": "Apartment",
+    "housingType": {
+      "value": "Apartment",
+      "customValue": null
+    },
     "environmentalPractices": [
       "Recycling",
       "Conserving water"
@@ -99,7 +105,10 @@
     "numberOfCars": 2,
     "hasPets": true,
     "numberOfPets": 1,
-    "housingType": "House",
+    "housingType": {
+      "value": "House",
+      "customValue": null
+    },
     "environmentalPractices": [
       "Recycling",
       "Composting food scraps",
@@ -107,6 +116,84 @@
       "Reducing plastic use",
       "Using reusable shopping bags",
       "Participating in local environmental initiatives"
+    ]
+  },
+  {
+    "familyName": "Treehouse Family",
+    "address": "101 Forest Lane, Woodland, OR 97055",
+    "surveyStatus": "completed",
+    "dateSurveyed": "2024-02-01T09:00:00.000Z",
+    "focalPoint": {
+      "firstName": "Eco",
+      "email": "eco.treehouse@email.com",
+      "pictureUrl": "https://example.com/photos/eco-treehouse.jpg"
+    },
+    "familyMembers": [
+      {
+        "firstName": "Eco",
+        "lastName": "Treehouse",
+        "birthDate": "1990-06-15"
+      },
+      {
+        "firstName": "Leaf",
+        "lastName": "Treehouse",
+        "birthDate": "1992-03-20"
+      }
+    ],
+    "numberOfCars": 0,
+    "hasPets": true,
+    "numberOfPets": 3,
+    "housingType": {
+      "value": "Other",
+      "customValue": "Sustainable Treehouse"
+    },
+    "environmentalPractices": [
+      "Recycling",
+      "Composting food scraps",
+      "Conserving water",
+      "Reducing plastic use",
+      "Using reusable shopping bags",
+      "Participating in local environmental initiatives"
+    ]
+  },
+  {
+    "familyName": "Yurt Dwellers",
+    "address": "202 Mountain View, Nomad, CO 80401",
+    "surveyStatus": "completed",
+    "dateSurveyed": "2024-02-05T11:30:00.000Z",
+    "focalPoint": {
+      "firstName": "Nomad",
+      "email": "nomad.yurt@email.com"
+    },
+    "familyMembers": [
+      {
+        "firstName": "Nomad",
+        "lastName": "Yurt",
+        "birthDate": "1988-12-01"
+      },
+      {
+        "firstName": "Sky",
+        "lastName": "Yurt",
+        "birthDate": "1991-07-15"
+      },
+      {
+        "firstName": "Star",
+        "lastName": "Yurt",
+        "birthDate": "2015-09-30"
+      }
+    ],
+    "numberOfCars": 1,
+    "hasPets": true,
+    "numberOfPets": 2,
+    "housingType": {
+      "value": "Other",
+      "customValue": "Traditional Mongolian Yurt"
+    },
+    "environmentalPractices": [
+      "Recycling",
+      "Composting food scraps",
+      "Conserving water",
+      "Reducing plastic use"
     ]
   }
 ] 

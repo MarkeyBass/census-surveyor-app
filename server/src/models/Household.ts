@@ -1,5 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { HouseholdType } from "../types/HouseholdTypes";
+import { HousingTypeEnum } from "../types/HouseholdTypes";
+import { EnvironmentalPracticeEnum, SurveyStatusEnum } from "../types/HouseholdTypes";
 
 /**
  * Indexed fields used throughout the Household model.
@@ -31,8 +33,8 @@ const householdSchema = new Schema(
     address: { type: String, required: true },
     surveyStatus: {
       type: String,
-      enum: ["pending", "completed"],
-      default: "pending",
+      enum: Object.values(SurveyStatusEnum),
+      default: SurveyStatusEnum.PENDING,
     },
     dateSurveyed: { type: Date },
     focalPoint: { type: focalPointSchema, required: true },
@@ -41,21 +43,33 @@ const householdSchema = new Schema(
     hasPets: { type: Boolean, required: true },
     numberOfPets: { type: Number, min: 0 },
     housingType: {
-      type: String,
-      enum: ["Apartment", "House", "Condominium", "Duplex", "Mobile home", "Other"],
+      type: {
+        value: {
+          type: String,
+          required: true,
+          enum: Object.values(HousingTypeEnum),
+        },
+        customValue: {
+          type: String,
+          validate: {
+            validator: function (this: any, value: string) {
+              // If value is "Other", customValue is required
+              if (this.value === HousingTypeEnum.OTHER) {
+                return value != null && value.trim().length > 0;
+              }
+              // If value is not "Other", customValue should be null/undefined
+              return value == null;
+            },
+            message: "Custom value is required when housing type is 'Other'",
+          },
+        },
+      },
       required: true,
     },
     environmentalPractices: [
       {
         type: String,
-        enum: [
-          "Recycling",
-          "Composting food scraps",
-          "Conserving water",
-          "Reducing plastic use",
-          "Using reusable shopping bags",
-          "Participating in local environmental initiatives",
-        ],
+        enum: Object.values(EnvironmentalPracticeEnum),
       },
     ],
   },
@@ -73,10 +87,10 @@ householdSchema.index({ [indexedFields.SLUG]: 1 }, { unique: true });
 householdSchema.index({ [indexedFields.FOCAL_POINT_EMAIL]: 1 });
 
 /**
- * Pre-validate hook to generate a unique slug
- * Combines family name and email to create a URL-friendly identifier
+ * Pre-validate hook to generate a unique slug and clean up housing type data
  */
 householdSchema.pre("validate", function (next) {
+  // Generate slug if not exists
   if (!this.slug) {
     const familyNameSlug = this.familyName.toLowerCase().replace(/ /g, "-");
     const emailSlug = this.focalPoint[indexedFields.FOCAL_POINT_EMAIL]
@@ -85,6 +99,13 @@ householdSchema.pre("validate", function (next) {
       .replace(/[^a-z0-9]/g, "-");
     this.slug = `${familyNameSlug}-${emailSlug}`;
   }
+
+  // Clean up housing type customValue
+  if (this.housingType && this.housingType?.value !== HousingTypeEnum.OTHER) {
+    // Remove customValue for non-Other types
+    this.housingType.customValue = undefined;
+  }
+
   next();
 });
 

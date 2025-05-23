@@ -1,75 +1,77 @@
-import { z } from 'zod';
-import { householdSchema, familyMemberSchema, focalPointSchema } from '../validations/householdSchema';
+import { z } from "zod";
+import {
+  householdSchema,
+  familyMemberSchema,
+  focalPointSchema,
+} from "../validations/householdSchema";
+
+// ============================================================================
+// Enums
+// ============================================================================
 
 /**
- * Represents a family member in the household
- * @typedef {Object} FamilyMemberType
- * @property {string} firstName - First name of the family member (1-50 characters)
- * @property {string} lastName - Last name of the family member (1-50 characters)
- * @property {Date} birthDate - Date of birth of the family member
- * @example
- * {
- *   firstName: "John",
- *   lastName: "Doe",
- *   birthDate: new Date("1990-01-01")
- * }
+ * Available housing types
+ */
+export const HousingTypeEnum = {
+  APARTMENT: "Apartment",
+  HOUSE: "House",
+  CONDOMINIUM: "Condominium",
+  DUPLEX: "Duplex",
+  MOBILE_HOME: "Mobile home",
+  OTHER: "Other",
+} as const;
+
+export type HousingTypeUnion = (typeof HousingTypeEnum)[keyof typeof HousingTypeEnum];
+
+/**
+ * Available environmental practices
+ */
+export const EnvironmentalPracticeEnum = {
+  RECYCLING: "Recycling",
+  COMPOSTING: "Composting food scraps",
+  WATER_CONSERVATION: "Conserving water",
+  PLASTIC_REDUCTION: "Reducing plastic use",
+  REUSABLE_BAGS: "Using reusable shopping bags",
+  LOCAL_INITIATIVES: "Participating in local environmental initiatives",
+} as const;
+
+export type EnvironmentalPracticeUnion =
+  (typeof EnvironmentalPracticeEnum)[keyof typeof EnvironmentalPracticeEnum];
+
+/**
+ * Available survey statuses
+ */
+export const SurveyStatusEnum = {
+  PENDING: "pending",
+  COMPLETED: "completed",
+} as const;
+
+export type SurveyStatusUnion = (typeof SurveyStatusEnum)[keyof typeof SurveyStatusEnum];
+
+// ============================================================================
+// Types
+// ============================================================================
+
+/**
+ * Family member in the household
  */
 export type FamilyMemberType = z.infer<typeof familyMemberSchema>;
 
 /**
- * Represents the focal point (main contact) of the household
- * @typedef {Object} FocalPointType
- * @property {string} firstName - First name of the focal point (1-50 characters)
- * @property {string} [pictureUrl] - Optional URL to the focal point's picture (max 500 characters)
- * @property {string} email - Email address of the focal point (max 100 characters)
- * @example
- * {
- *   firstName: "Jane",
- *   pictureUrl: "https://example.com/photo.jpg",
- *   email: "jane@example.com"
- * }
+ * Main contact person for the household
  */
 export type FocalPointType = z.infer<typeof focalPointSchema>;
 
 /**
- * Represents a household in the census survey
- * @typedef {Object} HouseholdType
- * @property {string} [_id] - Optional MongoDB document ID
- * @property {string} familyName - Family name (1-100 characters)
- * @property {string} address - Physical address (1-200 characters)
- * @property {'pending'|'completed'} surveyStatus - Current status of the survey
- * @property {Date} [dateSurveyed] - Optional date when the survey was completed
- * @property {FocalPointType} focalPoint - Main contact person for the household
- * @property {FamilyMemberType[]} familyMembers - Array of family members living in the household
- * @property {number} numberOfCars - Number of cars owned (0-10)
- * @property {boolean} hasPets - Whether the household has pets
- * @property {number} [numberOfPets] - Optional number of pets (required if hasPets is true)
- * @property {'Apartment'|'House'|'Condominium'|'Duplex'|'Mobile home'|'Other'} housingType - Type of housing
- * @property {Array<'Recycling'|'Composting food scraps'|'Conserving water'|'Reducing plastic use'|'Using reusable shopping bags'|'Participating in local environmental initiatives'>} [environmentalPractices] - Optional array of environmental practices
- * @property {Date} createdAt - Timestamp when the record was created
- * @property {Date} updatedAt - Timestamp when the record was last updated
- * @example
- * {
- *   familyName: "Smith Family",
- *   address: "123 Main St",
- *   surveyStatus: "pending",
- *   focalPoint: {
- *     firstName: "John",
- *     email: "john@example.com"
- *   },
- *   familyMembers: [
- *     {
- *       firstName: "John",
- *       lastName: "Smith",
- *       birthDate: new Date("1980-01-01")
- *     }
- *   ],
- *   numberOfCars: 2,
- *   hasPets: true,
- *   numberOfPets: 1,
- *   housingType: "House",
- *   environmentalPractices: ["Recycling", "Composting food scraps"]
- * }
+ * Housing type with optional custom value
+ */
+export type HousingTypeInput = {
+  value: HousingTypeUnion;
+  customValue?: string;
+};
+
+/**
+ * Household record in the database
  */
 export type HouseholdType = z.infer<typeof householdSchema> & {
   _id?: string;
@@ -77,5 +79,7 @@ export type HouseholdType = z.infer<typeof householdSchema> & {
   updatedAt: Date;
 };
 
-/** Type for household data coming from API requests */
-export type HouseholdInputType = z.infer<typeof householdSchema>; 
+/**
+ * Household data for API requests
+ */
+export type HouseholdInputType = z.infer<typeof householdSchema>;

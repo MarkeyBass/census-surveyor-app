@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { HousingTypeEnum, EnvironmentalPracticeEnum, SurveyStatusEnum } from "../types/HouseholdTypes";
 
 /**
  * Validation schema for family member data
@@ -44,7 +45,7 @@ export const householdSchema = z.object({
     .string()
     .min(1, "Address is required")
     .max(200, "Address must be less than 200 characters"),
-  surveyStatus: z.enum(["pending", "completed"]).default("pending"),
+  surveyStatus: z.enum(Object.values(SurveyStatusEnum) as [string, ...string[]]).default(SurveyStatusEnum.PENDING),
   dateSurveyed: z
     .string()
     .transform((str) => new Date(str))
@@ -71,20 +72,25 @@ export const householdSchema = z.object({
         message: "Number of pets must be greater than 0 if hasPets is true",
       }
     ),
-  housingType: z.enum(["Apartment", "House", "Condominium", "Duplex", "Mobile home", "Other"], {
-    errorMap: () => ({ message: "Invalid housing type - select from the list" }),
+  housingType: z.object({
+    value: z.enum(Object.values(HousingTypeEnum) as [string, ...string[]], {
+      errorMap: () => ({ message: "Invalid housing type - select from the list" }),
+    }),
+    customValue: z.string().optional(),
+  }).superRefine((data, ctx) => {
+    // If value is "Other", customValue is required
+    if (data.value === HousingTypeEnum.OTHER) {
+      if (!data.customValue || data.customValue.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Custom value is required when housing type is 'Other'",
+          path: ["customValue"]
+        });
+      }
+    }
   }),
   environmentalPractices: z
-    .array(
-      z.enum([
-        "Recycling",
-        "Composting food scraps",
-        "Conserving water",
-        "Reducing plastic use",
-        "Using reusable shopping bags",
-        "Participating in local environmental initiatives",
-      ])
-    )
+    .array(z.enum(Object.values(EnvironmentalPracticeEnum) as [string, ...string[]]))
     .optional(),
 });
 
