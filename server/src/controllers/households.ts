@@ -51,7 +51,6 @@ const updateHousehold = asyncHandler<{ id: string }, {}, Partial<HouseholdInputT
   ) => {
     const household = await HouseholdModel.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
-      runValidators: true,
     });
     if (!household) {
       throw new ErrorResponse(`Household not found with id of ${req.params.id}`, 404);
@@ -72,7 +71,7 @@ const completeSurvey = asyncHandler<{ id: string }, {}, Partial<HouseholdInputTy
         surveyStatus: "completed",
         dateSurveyed: new Date(),
       },
-      { new: true, runValidators: true }
+      { new: true }
     );
     if (!household) {
       throw new ErrorResponse(`Household not found with id of ${req.params.id}`, 404);
@@ -104,7 +103,6 @@ const adminUpdateHousehold = asyncHandler<{ id: string }, {}, HouseholdUpdateTyp
       },
       {
         new: true,
-        runValidators: true,
       }
     );
 
