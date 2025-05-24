@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { HousingTypeEnum, EnvironmentalPracticeEnum, SurveyStatusEnum } from "../types/HouseholdTypes";
+import {
+  HousingTypeEnum,
+  EnvironmentalPracticeEnum,
+  SurveyStatusEnum,
+} from "../types/HouseholdTypes";
 
 /**
  * Validation schema for family member data
@@ -24,21 +28,23 @@ export const familyMemberSchema = z.object({
 /**
  * Validation schema for focal point data
  */
-// TODO: do not allow to change email - make it immutable here 
-// TODO: Create seperate endpoint for email change (admon only)
+// TODO: do not allow to change email - make it immutable here
+// TODO: Create seperate endpoint for email change (admin only)
 export const focalPointSchema = z.object({
-  firstName: z
-    .string()
-    .max(50, "First name must be less than 50 characters")
-    .optional(),
+  firstName: z.string().max(50, "First name must be less than 50 characters").optional(),
   pictureUrl: z.string().url("Invalid URL format").max(500, "URL is too long").optional(),
   email: z.string().email("Invalid email address").max(100, "Email is too long"),
 });
 
 /**
+ * Validation schema for focal point updates
+ * Makes all fields optional while maintaining the same validation rules
+ */
+export const focalPointUpdateSchema = focalPointSchema.partial();
+
+/**
  * Validation schema for household data
  */
-
 // TODO: make email immutable
 export const householdSchema = z.object({
   familyName: z
@@ -49,7 +55,9 @@ export const householdSchema = z.object({
     .string()
     .min(1, "Address is required")
     .max(200, "Address must be less than 200 characters"),
-  surveyStatus: z.enum(Object.values(SurveyStatusEnum) as [string, ...string[]]).default(SurveyStatusEnum.PENDING),
+  surveyStatus: z
+    .enum(Object.values(SurveyStatusEnum) as [string, ...string[]])
+    .default(SurveyStatusEnum.PENDING),
   dateSurveyed: z
     .string()
     .transform((str) => new Date(str))
@@ -76,33 +84,44 @@ export const householdSchema = z.object({
         message: "Number of pets must be greater than 0 if hasPets is true",
       }
     ),
-  housingType: z.object({
-    value: z.enum(Object.values(HousingTypeEnum) as [string, ...string[]], {
-      errorMap: () => ({ message: "Invalid housing type - select from the list" }),
-    }),
-    customValue: z.string().optional(),
-  }).superRefine((data, ctx) => {
-    // If value is "Other", customValue is required
-    if (data.value === HousingTypeEnum.OTHER) {
-      if (!data.customValue || data.customValue.trim().length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Custom value is required when housing type is 'Other'",
-          path: ["customValue"]
-        });
+  housingType: z
+    .object({
+      value: z.enum(Object.values(HousingTypeEnum) as [string, ...string[]], {
+        errorMap: () => ({ message: "Invalid housing type - select from the list" }),
+      }),
+      customValue: z.string().optional(),
+    })
+    .superRefine((data, ctx) => {
+      // If value is "Other", customValue is required
+      if (data.value === HousingTypeEnum.OTHER) {
+        if (!data.customValue || data.customValue.trim().length === 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Custom value is required when housing type is 'Other'",
+            path: ["customValue"],
+          });
+        }
       }
-    }
-  }),
+    }),
   environmentalPractices: z
     .array(z.enum(Object.values(EnvironmentalPracticeEnum) as [string, ...string[]]))
     .optional(),
 });
 
+// /**
+//  * Validation schema for household updates
+//  * Makes all fields optional while maintaining the same validation rules
+//  */
+// export const householdUpdateSchema = householdSchema.partial();
+
 /**
  * Validation schema for household updates
  * Makes all fields optional while maintaining the same validation rules
+ * Uses focalPointUpdateSchema to allow partial focal point updates
  */
-export const householdUpdateSchema = householdSchema.partial();
+export const householdUpdateSchema = householdSchema.partial().extend({
+  focalPoint: focalPointUpdateSchema,
+});
 
 // TODO: move the date creation to mongoose custom hook
 /**

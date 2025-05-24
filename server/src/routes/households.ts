@@ -1,10 +1,10 @@
 import express from "express";
 import householdController from "../controllers/households";
 import { validateRequest } from "../middleware/validateRequest";
-import { 
-  householdUpdateSchema, 
+import {
+  householdUpdateSchema,
   completeSurveySchema,
-  householdCreateSchema 
+  householdCreateSchema,
 } from "../validations/householdSchema";
 
 const router = express.Router();
@@ -65,6 +65,5 @@ router.post(
 router.delete("/:id", householdController.deleteHousehold);
 
 export default router;
-
 
 // TODO: implement protect and auth middlewares (theoretically, not for now)
