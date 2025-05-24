@@ -55,13 +55,6 @@ export const householdSchema = z.object({
   surveyStatus: z
     .enum(Object.values(SurveyStatusEnum) as [string, ...string[]])
     .default(SurveyStatusEnum.PENDING),
-  dateSurveyed: z
-    .string()
-    .transform((str) => new Date(str))
-    .refine((date) => !isNaN(date.getTime()), {
-      message: "Invalid date format",
-    })
-    .optional(),
   focalPoint: focalPointSchema,
   familyMembers: z.array(familyMemberSchema),
   numberOfCars: z.number().int().min(0, "Number of cars must be a non-negative integer"),
@@ -105,12 +98,6 @@ export const householdSchema = z.object({
     .optional(),
 });
 
-// /**
-//  * Validation schema for household updates
-//  * Makes all fields optional while maintaining the same validation rules
-//  */
-// export const householdUpdateSchema = householdSchema.partial();
-
 /**
  * Validation schema for household updates
  * Makes all fields optional while maintaining the same validation rules
@@ -127,12 +114,6 @@ export const householdUpdateSchema = householdSchema.partial().extend({
  */
 export const completeSurveySchema = householdSchema.extend({
   surveyStatus: z.literal(SurveyStatusEnum.COMPLETED),
-  dateSurveyed: z
-    .string()
-    .transform((str) => new Date(str))
-    .refine((date) => !isNaN(date.getTime()), {
-      message: "Invalid date format",
-    }),
 });
 
 /**

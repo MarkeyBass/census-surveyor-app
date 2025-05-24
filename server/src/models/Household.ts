@@ -4,6 +4,7 @@ import { HousingTypeEnum } from "../types/HouseholdTypes";
 import { EnvironmentalPracticeEnum, SurveyStatusEnum } from "../types/HouseholdTypes";
 import slugify from "slugify";
 import crypto from "crypto";
+import { ErrorResponse } from "../middleware/error";
 
 /**
  * Indexed fields used throughout the Household model.
@@ -47,7 +48,7 @@ const householdSchema = new Schema(
       enum: Object.values(SurveyStatusEnum),
       default: SurveyStatusEnum.PENDING,
     },
-    dateSurveyed: { type: Date },
+    dateSurveyed: { type: Date, default: null },
     focalPoint: { type: focalPointSchema, required: true },
     familyMembers: [familyMemberSchema],
     numberOfCars: { type: Number, min: 0 },
@@ -114,6 +115,7 @@ function generateSlug(familyName: string): string {
  * Pre-validate hook to generate a unique slug and clean up housing type data
  */
 householdSchema.pre("validate", function (next) {
+  try {
   // Generate slug in the initial creation of the document
   if (!this.slug) {
     this.slug = generateSlug(this.familyName);
@@ -125,32 +127,15 @@ householdSchema.pre("validate", function (next) {
     this.housingType.customValue = undefined;
   }
 
-  next();
+    next();
+  } catch (error: any) {
+    next(error);
+  }
 });
 
-/**
- * Pre-save hook to validate completed survey data
- * Works with both save and findByIdAndUpdate operations
- */
-householdSchema.pre(
-  "save",
-  function (this: HouseholdType & Document, next: mongoose.CallbackWithoutResultAndOptionalError) {
-    validateCompletedSurvey(this, next);
-  }
-);
-
-// Use findOneAndUpdate for both findOneAndUpdate and findByIdAndUpdate
-householdSchema.pre(
-  "findOneAndUpdate",
-  function (this: Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
-    const doc = this.getUpdate() as Partial<HouseholdType>;
-    validateCompletedSurvey(doc, next);
-  }
-);
 
 function validateCompletedSurvey(
   doc: Partial<HouseholdType>,
-  next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
   // Only validate if status is being changed to completed
   if (doc.surveyStatus === SurveyStatusEnum.COMPLETED) {
@@ -163,7 +148,6 @@ function validateCompletedSurvey(
       "numberOfCars",
       "hasPets",
       "housingType.value",
-      "dateSurveyed",
     ];
 
     const missingFields = requiredFields.filter((field) => {
@@ -172,23 +156,17 @@ function validateCompletedSurvey(
     });
 
     if (missingFields.length > 0) {
-      return next(
-        new Error(`Cannot complete survey. Missing required fields: ${missingFields.join(", ")}`)
-      );
+      throw new ErrorResponse(`Cannot complete survey. Missing required fields: ${missingFields.join(", ")}`, 400);
     }
 
     // Validate family members array is not empty
     if (!doc.familyMembers || doc.familyMembers.length === 0) {
-      return next(new Error("Cannot complete survey. At least one family member is required."));
+      throw new ErrorResponse("Cannot complete survey. At least one family member is required.", 400);
     }
 
     // Validate numberOfPets if hasPets is true
     if (doc.hasPets && (!doc.numberOfPets || doc.numberOfPets <= 0)) {
-      return next(
-        new Error(
-          "Cannot complete survey. Number of pets must be greater than 0 when hasPets is true."
-        )
-      );
+      throw new ErrorResponse("Cannot complete survey. Number of pets must be greater than 0 when hasPets is true.", 400);
     }
 
     // Validate housing type customValue if value is "Other"
@@ -196,40 +174,64 @@ function validateCompletedSurvey(
       doc.housingType?.value === HousingTypeEnum.OTHER &&
       (!doc.housingType.customValue || doc.housingType.customValue.trim() === "")
     ) {
-      return next(
-        new Error(
-          "Cannot complete survey. Custom housing type value is required when type is 'Other'."
-        )
-      );
+      throw new ErrorResponse("Cannot complete survey. Custom housing type value is required when type is 'Other'.", 400);
     }
   }
+}
 
-  next();
+// Helper function to handle email updates
+async function handleEmailUpdate(
+  update: HouseholdUpdateType,
+  isAdminUpdate: boolean,
+  query: Query<any, any>,
+) {
+  if (update?.focalPoint?.email) {
+    // Retrieve the original focal point email before change:
+    const originalDoc = await HouseholdModel.findById(query.getQuery()._id as string).select(
+      "focalPoint.email"
+    );
+    const originalFocalPointEmail = originalDoc ? originalDoc.focalPoint.email : null;
+
+    if(originalFocalPointEmail !== update.focalPoint.email && !isAdminUpdate) {
+      throw new ErrorResponse("Email can only be modified by an admin", 401);
+    }
+  }
 }
 
 householdSchema.pre(
   "findOneAndUpdate",
   async function (this: Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
-    const update = this.getUpdate() as HouseholdUpdateType;
-    if (update?.focalPoint?.email) {
-      // Retrieve the original focal point email before change:
-      const originalDoc = await HouseholdModel.findById(this.getQuery()._id as string).select(
-        "focalPoint.email"
-      );
-      const originalFocalPointEmail = originalDoc ? originalDoc.focalPoint.email : null;
+    try {
+      const update = this.getUpdate() as HouseholdUpdateType;
 
-      if (originalFocalPointEmail === update.focalPoint.email) {
-        // Emails are the same, no change needed
-        return next();
-      } else {
-        if (!update.isAdminUpdate) {
-          return next(new Error("Email can only be modified by an admin"));
-        }
-        // Remove the flag from the update
-        delete update.isAdminUpdate;
+      const isAdminUpdate = Boolean(update.isAdminUpdate);
+      delete update.isAdminUpdate;
+
+      // Remove _id from the update object if it exists
+      if (update._id) {
+        delete update._id;
       }
+
+      // Handle survey completion
+      if (update.surveyStatus === SurveyStatusEnum.COMPLETED) {
+        update.dateSurveyed = new Date();
+      }
+
+      // Validate survey completion if needed
+      if (update.surveyStatus === SurveyStatusEnum.COMPLETED) {
+        validateCompletedSurvey(update);
+      }
+
+      // Handle email update validation
+      if (update?.focalPoint?.email) {
+        await handleEmailUpdate(update, isAdminUpdate, this);
+      }
+
+      next();
+    } catch (error: any) {
+      // Ensure we pass the error to next() to properly handle it in the middleware chain
+      next(error);
     }
-    next();
   }
 );
 

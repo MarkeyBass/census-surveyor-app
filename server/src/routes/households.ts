@@ -27,10 +27,12 @@ router.put("/:id", validateRequest(householdUpdateSchema), updateHousehold);
 
 router.put("/:id/admin-update", validateRequest(householdUpdateSchema), adminUpdateHousehold);
 
-router.post("/:id/complete-survey", validateRequest(completeSurveySchema), completeSurvey);
+// TODO: implement protect and auth middlewares to support private routes (theoretically, not for now) - mau=ybe fetch the data from the db inside the schema or use the schema inside the controller...
+// router.post("/:id/complete-survey", validateRequest(completeSurveySchema), completeSurvey);
+router.put("/:id/complete-survey", completeSurvey);
 
 router.delete("/:id", deleteHousehold);
 
 export default router;
 
-// TODO: implement protect and auth middlewares (theoretically, not for now)
+

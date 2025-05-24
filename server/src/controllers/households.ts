@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { HouseholdModel } from "../models/Household";
-import { HouseholdInputType, HouseholdType, HouseholdUpdateType } from "../types/HouseholdTypes";
+import { HouseholdInputType, HouseholdType, HouseholdUpdateType, SurveyStatusEnum } from "../types/HouseholdTypes";
 import asyncHandler from "../middleware/async";
 import { ErrorResponse } from "../middleware/error";
 
@@ -18,7 +18,7 @@ type ApiResponse<T> = {
 /**
  * Get all households
  * @description Retrieves all households from the database, sorted by creation date
- * @route GET /api/households
+ * @route GET /api/v1/households
  * @access Public
  * @returns {Promise<void>} Sends response with array of households
  * @throws {ErrorResponse} If database query fails
@@ -33,7 +33,7 @@ export const getAllHouseholds = asyncHandler(
 /**
  * Get household by ID
  * @description Retrieves a single household by its ID
- * @route GET /api/households/:id
+ * @route GET /api/v1/households/:id
  * @access Public
  * @param {string} id - The household ID
  * @returns {Promise<void>} Sends response with household data
@@ -52,7 +52,7 @@ export const getHouseholdById = asyncHandler<{ id: string }>(
 /**
  * Create new household
  * @description Creates a new household with initial data
- * @route POST /api/households
+ * @route POST /api/v1/households
  * @access Private
  * @param {HouseholdInputType} body - The household data
  * @returns {Promise<void>} Sends response with created household
@@ -73,7 +73,7 @@ export const createHousehold = asyncHandler<{}, {}, HouseholdInputType>(
 /**
  * Update household
  * @description Updates an existing household's data
- * @route PUT /api/households/:id
+ * @route PUT /api/v1/households/:id
  * @access Private
  * @param {string} id - The household ID
  * @param {Partial<HouseholdInputType>} body - The update data
@@ -97,58 +97,51 @@ export const updateHousehold = asyncHandler<{ id: string }, {}, Partial<Househol
 
 /**
  * Complete household survey
- * @description Marks a household survey as completed and sets the survey date
- * @route POST /api/households/:id/complete-survey
+ * @description Marks a household survey as completed
+ * @route PUT /api/v1/households/:id/complete-survey
  * @access Private
  * @param {string} id - The household ID
- * @param {Partial<HouseholdInputType>} body - The survey completion data
  * @returns {Promise<void>} Sends response with updated household
  * @throws {ErrorResponse} If household not found or validation fails
  */
-export const completeSurvey = asyncHandler<{ id: string }, {}, Partial<HouseholdInputType>>(
+// TODO: consider running schema validation inside the controller after fetching existingHousehold
+export const completeSurvey = asyncHandler<{ id: string }>(
   async (
-    req: Request<{ id: string }, {}, Partial<HouseholdInputType>>,
+    req: Request<{ id: string }>,
     res: Response<ApiResponse<HouseholdType>>
   ) => {
-    const household = await HouseholdModel.findByIdAndUpdate(
-      req.params.id,
-      {
-        ...req.body,
-        surveyStatus: "completed",
-        dateSurveyed: new Date(),
-      },
-      { new: true }
-    );
-    if (!household) {
+    // First check if household exists
+    const existingHousehold = await HouseholdModel.findById(req.params.id);
+    if (!existingHousehold) {
       throw new ErrorResponse(`Household not found with id of ${req.params.id}`, 404);
     }
-    res.status(200).json({ success: true, data: household });
-  }
-);
 
-/**
- * Admin Delete household
- * @description Deletes a household by its ID
- * @route DELETE /api/households/:id
- * @access Private (Admin)
- * @param {string} id - The household ID
- * @returns {Promise<void>} Sends success response
- * @throws {ErrorResponse} If household not found or deletion fails
- */
-export const deleteHousehold = asyncHandler<{ id: string }>(
-  async (req: Request<{ id: string }>, res: Response<ApiResponse<null>>) => {
-    const household = await HouseholdModel.findByIdAndDelete(req.params.id);
+    // Use findOneAndUpdate to leverage pre-update hooks
+    const household = await HouseholdModel.findOneAndUpdate(
+      { _id: req.params.id },
+      {
+        $set: {
+          surveyStatus: SurveyStatusEnum.COMPLETED
+        }
+      },
+      { 
+        new: true,
+        runValidators: true
+      }
+    );
+
     if (!household) {
       throw new ErrorResponse(`Household not found with id of ${req.params.id}`, 404);
     }
-    res.status(200).json({ success: true, data: null });
+
+    res.status(200).json({ success: true, data: household });
   }
 );
 
 /**
  * Admin update household
  * @description Updates any household field, including protected fields like email
- * @route PUT /api/households/:id/admin-update
+ * @route PUT /api/v1/households/:id/admin-update
  * @access Private (Admin)
  * @param {string} id - The household ID
  * @param {HouseholdUpdateType} body - The update data
@@ -179,5 +172,24 @@ export const adminUpdateHousehold = asyncHandler<{ id: string }, {}, HouseholdUp
       success: true,
       data: household,
     });
+  }
+);
+
+/**
+ * Admin Delete household
+ * @description Deletes a household by its ID
+ * @route DELETE /api/v1/households/:id
+ * @access Private (Admin)
+ * @param {string} id - The household ID
+ * @returns {Promise<void>} Sends success response
+ * @throws {ErrorResponse} If household not found or deletion fails
+ */
+export const deleteHousehold = asyncHandler<{ id: string }>(
+  async (req: Request<{ id: string }>, res: Response<ApiResponse<null>>) => {
+    const household = await HouseholdModel.findByIdAndDelete(req.params.id);
+    if (!household) {
+      throw new ErrorResponse(`Household not found with id of ${req.params.id}`, 404);
+    }
+    res.status(200).json({ success: true, data: null });
   }
 );

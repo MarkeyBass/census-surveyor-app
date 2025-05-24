@@ -77,6 +77,7 @@ export type HouseholdType = z.infer<typeof householdSchema> & {
   _id?: string;
   createdAt: Date;
   updatedAt: Date;
+  dateSurveyed?: Date;
 };
 
 /**
