@@ -1,23 +1,24 @@
-// TODO implement async handler and error middleware
-
 import { Request, Response } from "express";
 import { HouseholdModel } from "../models/Household";
 import { HouseholdInputType, HouseholdType } from "../types/HouseholdTypes";
 import asyncHandler from "../middleware/async";
 import { ErrorResponse } from "../middleware/error";
 
-//TODO: move to a separate file and change error responses accordingly
-type ApiError = {
-  message?: string;
-  error?: Error | string;
-  success?: boolean;
+/**
+ * Standard API response structure
+ * @template T - Type of the successful response data
+ */
+type ApiResponse<T> = {
+  success: boolean;
+  data?: T;
+  error?: string;
+  errors?: Array<{ path: string; message: string }>;
 };
 
-type ApiResponse<T> = T | ApiError;
 
 const getAllHouseholds = asyncHandler(async (req: Request, res: Response<ApiResponse<HouseholdType[]>>) => {
   const households = await HouseholdModel.find().sort({ createdAt: -1 });
-  res.status(200).json(households);
+  res.status(200).json({ success: true, data: households });
 });
 
 const getHouseholdById = asyncHandler<{ id: string }>(async (req: Request<{ id: string }>, res: Response<ApiResponse<HouseholdType>>) => {
@@ -25,7 +26,7 @@ const getHouseholdById = asyncHandler<{ id: string }>(async (req: Request<{ id: 
   if (!household) {
     throw new ErrorResponse(`Household not found with id of ${req.params.id}`, 404);
   }
-  res.status(200).json(household);
+  res.status(200).json({ success: true, data: household });
 });
 
 const createHousehold = asyncHandler<{}, {}, HouseholdInputType>(async (
@@ -38,7 +39,7 @@ const createHousehold = asyncHandler<{}, {}, HouseholdInputType>(async (
   };
   const household = new HouseholdModel(householdData);
   await household.save();
-  res.status(201).json(household);
+  res.status(201).json({ success: true, data: household });
 });
 
 const updateHousehold = asyncHandler<{ id: string }, {}, Partial<HouseholdInputType>>(async (
@@ -52,7 +53,7 @@ const updateHousehold = asyncHandler<{ id: string }, {}, Partial<HouseholdInputT
   if (!household) {
     throw new ErrorResponse(`Household not found with id of ${req.params.id}`, 404);
   }
-  res.status(200).json(household);
+  res.status(200).json({ success: true, data: household });
 });
 
 const completeSurvey = asyncHandler<{ id: string }, {}, Partial<HouseholdInputType>>(async (
@@ -71,18 +72,18 @@ const completeSurvey = asyncHandler<{ id: string }, {}, Partial<HouseholdInputTy
   if (!household) {
     throw new ErrorResponse(`Household not found with id of ${req.params.id}`, 404);
   }
-  res.status(200).json(household);
+  res.status(200).json({ success: true, data: household });
 });
 
 const deleteHousehold = asyncHandler<{ id: string }>(async (
   req: Request<{ id: string }>,
-  res: Response<ApiResponse<{ message: string }>>
+  res: Response<ApiResponse<null>>
 ) => {
   const household = await HouseholdModel.findByIdAndDelete(req.params.id);
   if (!household) {
     throw new ErrorResponse(`Household not found with id of ${req.params.id}`, 404);
   }
-  res.status(200).json({ message: "Household deleted successfully" });
+  res.status(200).json({ success: true, data: null });
 });
 
 const householdController = {
