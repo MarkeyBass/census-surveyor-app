@@ -1,5 +1,13 @@
 import express from "express";
-import householdController from "../controllers/households";
+import {
+  getAllHouseholds,
+  getHouseholdById,
+  createHousehold,
+  updateHousehold,
+  completeSurvey,
+  deleteHousehold,
+  adminUpdateHousehold,
+} from "../controllers/households";
 import { validateRequest } from "../middleware/validateRequest";
 import {
   householdUpdateSchema,
@@ -9,72 +17,19 @@ import {
 
 const router = express.Router();
 
-/**
- * @route   GET /api/households
- * @desc    Get all households
- * @access  Public
- */
-router.get("/", householdController.getAllHouseholds);
+router.get("/", getAllHouseholds);
 
-/**
- * @route   GET /api/households/:id
- * @desc    Get household by ID
- * @access  Public
- */
-router.get("/:id", householdController.getHouseholdById);
+router.get("/:id", getHouseholdById);
 
-/**
- * @route   POST /api/households
- * @desc    Create a new household (Admin only)
- * @access  Private
- * @body    {
- *   familyName: string,
- *   address: string,
- *   focalPoint: {
- *     email: string
- *   }
- * }
- */
-router.post("/", validateRequest(householdCreateSchema), householdController.createHousehold);
+router.post("/", validateRequest(householdCreateSchema), createHousehold);
 
-/**
- * @route   PUT /api/households/:id
- * @desc    Update household details
- * @access  Private (Surveyor or Admin)
- * @body    Partial household data
- */
-router.put("/:id", validateRequest(householdUpdateSchema), householdController.updateHousehold);
+router.put("/:id", validateRequest(householdUpdateSchema), updateHousehold);
 
-/**
- * @route   PUT /api/households/:id/admin-update
- * @desc    Admin update household
- * @access  Private (Admin)
- * @body    Partial household data
- */
-router.put(
-  "/:id/admin-update",
-  validateRequest(householdUpdateSchema),
-  householdController.adminUpdateHousehold
-);
+router.put("/:id/admin-update", validateRequest(householdUpdateSchema), adminUpdateHousehold);
 
-/**
- * @route   POST /api/households/:id/complete-survey
- * @desc    Complete household survey
- * @access  Private (Surveyor or Admin)
- * @body    Complete household data with survey results
- */
-router.post(
-  "/:id/complete-survey",
-  validateRequest(completeSurveySchema),
-  householdController.completeSurvey
-);
+router.post("/:id/complete-survey", validateRequest(completeSurveySchema), completeSurvey);
 
-/**
- * @route   DELETE /api/households/:id
- * @desc    Delete household
- * @access  Private (Admin)
- */
-router.delete("/:id", householdController.deleteHousehold);
+router.delete("/:id", deleteHousehold);
 
 export default router;
 

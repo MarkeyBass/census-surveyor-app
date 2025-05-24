@@ -15,14 +15,31 @@ type ApiResponse<T> = {
   errors?: Array<{ path: string; message: string }>;
 };
 
-const getAllHouseholds = asyncHandler(
+/**
+ * Get all households
+ * @description Retrieves all households from the database, sorted by creation date
+ * @route GET /api/households
+ * @access Public
+ * @returns {Promise<void>} Sends response with array of households
+ * @throws {ErrorResponse} If database query fails
+ */
+export const getAllHouseholds = asyncHandler(
   async (req: Request, res: Response<ApiResponse<HouseholdType[]>>) => {
     const households = await HouseholdModel.find().sort({ createdAt: -1 });
     res.status(200).json({ success: true, data: households });
   }
 );
 
-const getHouseholdById = asyncHandler<{ id: string }>(
+/**
+ * Get household by ID
+ * @description Retrieves a single household by its ID
+ * @route GET /api/households/:id
+ * @access Public
+ * @param {string} id - The household ID
+ * @returns {Promise<void>} Sends response with household data
+ * @throws {ErrorResponse} If household not found or database query fails
+ */
+export const getHouseholdById = asyncHandler<{ id: string }>(
   async (req: Request<{ id: string }>, res: Response<ApiResponse<HouseholdType>>) => {
     const household = await HouseholdModel.findById(req.params.id);
     if (!household) {
@@ -32,7 +49,16 @@ const getHouseholdById = asyncHandler<{ id: string }>(
   }
 );
 
-const createHousehold = asyncHandler<{}, {}, HouseholdInputType>(
+/**
+ * Create new household
+ * @description Creates a new household with initial data
+ * @route POST /api/households
+ * @access Private
+ * @param {HouseholdInputType} body - The household data
+ * @returns {Promise<void>} Sends response with created household
+ * @throws {ErrorResponse} If validation fails or database operation fails
+ */
+export const createHousehold = asyncHandler<{}, {}, HouseholdInputType>(
   async (req: Request<{}, {}, HouseholdInputType>, res: Response<ApiResponse<HouseholdType>>) => {
     const householdData: HouseholdInputType = {
       ...req.body,
@@ -44,7 +70,17 @@ const createHousehold = asyncHandler<{}, {}, HouseholdInputType>(
   }
 );
 
-const updateHousehold = asyncHandler<{ id: string }, {}, Partial<HouseholdInputType>>(
+/**
+ * Update household
+ * @description Updates an existing household's data
+ * @route PUT /api/households/:id
+ * @access Private
+ * @param {string} id - The household ID
+ * @param {Partial<HouseholdInputType>} body - The update data
+ * @returns {Promise<void>} Sends response with updated household
+ * @throws {ErrorResponse} If household not found or validation fails
+ */
+export const updateHousehold = asyncHandler<{ id: string }, {}, Partial<HouseholdInputType>>(
   async (
     req: Request<{ id: string }, {}, Partial<HouseholdInputType>>,
     res: Response<ApiResponse<HouseholdType>>
@@ -59,7 +95,17 @@ const updateHousehold = asyncHandler<{ id: string }, {}, Partial<HouseholdInputT
   }
 );
 
-const completeSurvey = asyncHandler<{ id: string }, {}, Partial<HouseholdInputType>>(
+/**
+ * Complete household survey
+ * @description Marks a household survey as completed and sets the survey date
+ * @route POST /api/households/:id/complete-survey
+ * @access Private
+ * @param {string} id - The household ID
+ * @param {Partial<HouseholdInputType>} body - The survey completion data
+ * @returns {Promise<void>} Sends response with updated household
+ * @throws {ErrorResponse} If household not found or validation fails
+ */
+export const completeSurvey = asyncHandler<{ id: string }, {}, Partial<HouseholdInputType>>(
   async (
     req: Request<{ id: string }, {}, Partial<HouseholdInputType>>,
     res: Response<ApiResponse<HouseholdType>>
@@ -80,7 +126,16 @@ const completeSurvey = asyncHandler<{ id: string }, {}, Partial<HouseholdInputTy
   }
 );
 
-const deleteHousehold = asyncHandler<{ id: string }>(
+/**
+ * Admin Delete household
+ * @description Deletes a household by its ID
+ * @route DELETE /api/households/:id
+ * @access Private (Admin)
+ * @param {string} id - The household ID
+ * @returns {Promise<void>} Sends success response
+ * @throws {ErrorResponse} If household not found or deletion fails
+ */
+export const deleteHousehold = asyncHandler<{ id: string }>(
   async (req: Request<{ id: string }>, res: Response<ApiResponse<null>>) => {
     const household = await HouseholdModel.findByIdAndDelete(req.params.id);
     if (!household) {
@@ -90,7 +145,17 @@ const deleteHousehold = asyncHandler<{ id: string }>(
   }
 );
 
-const adminUpdateHousehold = asyncHandler<{ id: string }, {}, HouseholdUpdateType>(
+/**
+ * Admin update household
+ * @description Updates any household field, including protected fields like email
+ * @route PUT /api/households/:id/admin-update
+ * @access Private (Admin)
+ * @param {string} id - The household ID
+ * @param {HouseholdUpdateType} body - The update data
+ * @returns {Promise<void>} Sends response with updated household
+ * @throws {ErrorResponse} If household not found or validation fails
+ */
+export const adminUpdateHousehold = asyncHandler<{ id: string }, {}, HouseholdUpdateType>(
   async (
     req: Request<{ id: string }, {}, HouseholdUpdateType>,
     res: Response<ApiResponse<HouseholdType>>
@@ -116,15 +181,3 @@ const adminUpdateHousehold = asyncHandler<{ id: string }, {}, HouseholdUpdateTyp
     });
   }
 );
-
-const householdController = {
-  getAllHouseholds,
-  getHouseholdById,
-  createHousehold,
-  updateHousehold,
-  completeSurvey,
-  deleteHousehold,
-  adminUpdateHousehold,
-};
-
-export default householdController;
