@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { AnyZodObject, ZodError } from 'zod';
+import { ErrorResponse } from './error';
 
 /**
  * Middleware to validate request data against a Zod schema
@@ -19,15 +20,12 @@ export const validateRequest = (schema: AnyZodObject) => {
           message: err.message
         }));
         
-        return res.status(400).json({
-          status: 'error',
-          message: 'Validation failed',
-          errors: formattedErrors
-        });
+        // Pass to error handler with formatted errors and original error
+        next(new ErrorResponse("Zod Validation failed", 400, formattedErrors, error));
+      } else {
+        // Pass other errors to the central error handler
+        next(error);
       }
-      
-      // Pass other errors to the central error handler
-      next(error);
     }
   };
 }; 

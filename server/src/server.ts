@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import householdRoutes from './routes/households';
 import colors from "colors";
+import { errorHandler } from './middleware/error';
 
 // Load environment variables
 dotenv.config({ path: "./src/config/config.env" });
@@ -30,10 +31,7 @@ mongoose.connect(MONGODB_URI)
 app.use('/api/v1/households', householdRoutes);
 
 // Error handling middleware
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Something went wrong!' });
-});
+app.use(errorHandler);
 
 // Start server
 const PORT = process.env.PORT || 8000;

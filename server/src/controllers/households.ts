@@ -3,6 +3,8 @@
 import { Request, Response } from "express";
 import { HouseholdModel } from "../models/Household";
 import { HouseholdInputType, HouseholdType } from "../types/HouseholdTypes";
+import asyncHandler from "../middleware/async";
+import { ErrorResponse } from "../middleware/error";
 
 //TODO: move to a separate file and change error responses accordingly
 type ApiError = {
@@ -13,120 +15,75 @@ type ApiError = {
 
 type ApiResponse<T> = T | ApiError;
 
+const getAllHouseholds = asyncHandler(async (req: Request, res: Response<ApiResponse<HouseholdType[]>>) => {
+  const households = await HouseholdModel.find().sort({ createdAt: -1 });
+  res.status(200).json(households);
+});
 
-const getAllHouseholds = async (req: Request, res: Response<ApiResponse<HouseholdType[]>>) => {
-  try {
-    const households = await HouseholdModel.find().sort({ createdAt: -1 });
-    res.status(200).json(households);
-  } catch (error) {
-    res.status(500).json({ 
-      message: "Error fetching households", 
-      error: error instanceof Error ? error : String(error)
-    });
+const getHouseholdById = asyncHandler<{ id: string }>(async (req: Request<{ id: string }>, res: Response<ApiResponse<HouseholdType>>) => {
+  const household = await HouseholdModel.findById(req.params.id);
+  if (!household) {
+    throw new ErrorResponse(`Household not found with id of ${req.params.id}`, 404);
   }
-};
+  res.status(200).json(household);
+});
 
-const getHouseholdById = async (req: Request, res: Response<ApiResponse<HouseholdType>>) => {
-  try {
-    const household = await HouseholdModel.findById(req.params.id);
-    if (!household) {
-      return res.status(404).json({ message: "Household not found" });
-    }
-    res.status(200).json(household);
-  } catch (error) {
-    res.status(500).json({ 
-      message: "Error fetching household", 
-      error: error instanceof Error ? error : String(error)
-    });
-  }
-};
-
-const createHousehold = async (
+const createHousehold = asyncHandler<{}, {}, HouseholdInputType>(async (
   req: Request<{}, {}, HouseholdInputType>,
   res: Response<ApiResponse<HouseholdType>>
 ) => {
-  try {
-    const householdData: HouseholdInputType = {
+  const householdData: HouseholdInputType = {
+    ...req.body,
+    surveyStatus: "pending",
+  };
+  const household = new HouseholdModel(householdData);
+  await household.save();
+  res.status(201).json(household);
+});
+
+const updateHousehold = asyncHandler<{ id: string }, {}, Partial<HouseholdInputType>>(async (
+  req: Request<{ id: string }, {}, Partial<HouseholdInputType>>,
+  res: Response<ApiResponse<HouseholdType>>
+) => {
+  const household = await HouseholdModel.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+  if (!household) {
+    throw new ErrorResponse(`Household not found with id of ${req.params.id}`, 404);
+  }
+  res.status(200).json(household);
+});
+
+const completeSurvey = asyncHandler<{ id: string }, {}, Partial<HouseholdInputType>>(async (
+  req: Request<{ id: string }, {}, Partial<HouseholdInputType>>,
+  res: Response<ApiResponse<HouseholdType>>
+) => {
+  const household = await HouseholdModel.findByIdAndUpdate(
+    req.params.id,
+    {
       ...req.body,
-      surveyStatus: "pending",
-    };
-    const household = new HouseholdModel(householdData);
-    await household.save();
-    res.status(201).json(household);
-  } catch (error) {
-    res.status(400).json({ 
-      message: "Error creating household", 
-      error: error instanceof Error ? error : String(error)
-    });
+      surveyStatus: "completed",
+      dateSurveyed: new Date(),
+    },
+    { new: true, runValidators: true }
+  );
+  if (!household) {
+    throw new ErrorResponse(`Household not found with id of ${req.params.id}`, 404);
   }
-};
+  res.status(200).json(household);
+});
 
-const updateHousehold = async (
-  req: Request<{ id: string }, {}, Partial<HouseholdInputType>>,
-  res: Response<ApiResponse<HouseholdType>>
-) => {
-  try {
-    const household = await HouseholdModel.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    if (!household) {
-      return res.status(404).json({ message: "Household not found" });
-    }
-    res.status(200).json(household);
-  } catch (error) {
-    // Send only the error message
-    console.log(error);
-    res.status(400).json({ 
-      error: error instanceof Error ? error.message : "Error updating household",
-      success: false,
-    });
-  }
-};
-
-const completeSurvey = async (
-  req: Request<{ id: string }, {}, Partial<HouseholdInputType>>,
-  res: Response<ApiResponse<HouseholdType>>
-) => {
-  try {
-    const household = await HouseholdModel.findByIdAndUpdate(
-      req.params.id,
-      {
-        ...req.body,
-        surveyStatus: "completed",
-        dateSurveyed: new Date(),
-      },
-      { new: true, runValidators: true }
-    );
-    if (!household) {
-      return res.status(404).json({ message: "Household not found" });
-    }
-    res.status(200).json(household);
-  } catch (error) {
-    res.status(400).json({ 
-      message: "Error completing survey", 
-      error: error instanceof Error ? error : String(error)
-    });
-  }
-};
-
-const deleteHousehold = async (
+const deleteHousehold = asyncHandler<{ id: string }>(async (
   req: Request<{ id: string }>,
   res: Response<ApiResponse<{ message: string }>>
 ) => {
-  try {
-    const household = await HouseholdModel.findByIdAndDelete(req.params.id);
-    if (!household) {
-      return res.status(404).json({ message: "Household not found" });
-    }
-    res.status(200).json({ message: "Household deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ 
-      message: "Error deleting household", 
-      error: error instanceof Error ? error : String(error)
-    });
+  const household = await HouseholdModel.findByIdAndDelete(req.params.id);
+  if (!household) {
+    throw new ErrorResponse(`Household not found with id of ${req.params.id}`, 404);
   }
-};
+  res.status(200).json({ message: "Household deleted successfully" });
+});
 
 const householdController = {
   getAllHouseholds,
