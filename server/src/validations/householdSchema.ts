@@ -24,11 +24,13 @@ export const familyMemberSchema = z.object({
 /**
  * Validation schema for focal point data
  */
+// TODO: do not allow to change email - make it immutable here 
+// TODO: Create seperate endpoint for email change (admon only)
 export const focalPointSchema = z.object({
   firstName: z
     .string()
-    .min(1, "First name is required")
-    .max(50, "First name must be less than 50 characters"),
+    .max(50, "First name must be less than 50 characters")
+    .optional(),
   pictureUrl: z.string().url("Invalid URL format").max(500, "URL is too long").optional(),
   email: z.string().email("Invalid email address").max(100, "Email is too long"),
 });
@@ -36,6 +38,8 @@ export const focalPointSchema = z.object({
 /**
  * Validation schema for household data
  */
+
+// TODO: make email immutable
 export const householdSchema = z.object({
   familyName: z
     .string()
@@ -92,6 +96,46 @@ export const householdSchema = z.object({
   environmentalPractices: z
     .array(z.enum(Object.values(EnvironmentalPracticeEnum) as [string, ...string[]]))
     .optional(),
+});
+
+/**
+ * Validation schema for household updates
+ * Makes all fields optional while maintaining the same validation rules
+ */
+export const householdUpdateSchema = householdSchema.partial();
+
+// TODO: move the date creation to mongoose custom hook
+/**
+ * Validation schema for completing a survey
+ * Extends the base schema but enforces completed status and required date
+ */
+export const completeSurveySchema = householdSchema.extend({
+  surveyStatus: z.literal(SurveyStatusEnum.COMPLETED),
+  dateSurveyed: z
+    .string()
+    .transform((str) => new Date(str))
+    .refine((date) => !isNaN(date.getTime()), {
+      message: "Invalid date format",
+    }),
+});
+
+/**
+ * Validation schema for initial household creation (Admin only)
+ * Only requires essential fields for initial setup
+ */
+export const householdCreateSchema = z.object({
+  familyName: z
+    .string()
+    .min(1, "Family name is required")
+    .max(100, "Family name must be less than 100 characters"),
+  address: z
+    .string()
+    .min(1, "Address is required")
+    .max(200, "Address must be less than 200 characters"),
+  focalPoint: z.object({
+    email: z.string().email("Invalid email address").max(100, "Email is too long"),
+  }),
+  surveyStatus: z.literal(SurveyStatusEnum.PENDING).default(SurveyStatusEnum.PENDING),
 });
 
 // Validation middleware

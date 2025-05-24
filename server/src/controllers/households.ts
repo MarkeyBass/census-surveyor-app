@@ -1,17 +1,19 @@
+// TODO implement async handler and error middleware
+
 import { Request, Response } from "express";
 import { HouseholdModel } from "../models/Household";
 import { HouseholdInputType, HouseholdType } from "../types/HouseholdTypes";
 
+//TODO: move to a separate file and change error responses accordingly
 type ApiError = {
-  message: string;
+  message?: string;
   error?: Error | string;
+  success?: boolean;
 };
 
 type ApiResponse<T> = T | ApiError;
 
-// @desc      Get all households
-// @route     GET /api/v1/households
-// @access    Public
+
 const getAllHouseholds = async (req: Request, res: Response<ApiResponse<HouseholdType[]>>) => {
   try {
     const households = await HouseholdModel.find().sort({ createdAt: -1 });
@@ -24,9 +26,6 @@ const getAllHouseholds = async (req: Request, res: Response<ApiResponse<Househol
   }
 };
 
-// @desc      Get single household
-// @route     GET /api/v1/households/:id
-// @access    Public
 const getHouseholdById = async (req: Request, res: Response<ApiResponse<HouseholdType>>) => {
   try {
     const household = await HouseholdModel.findById(req.params.id);
@@ -42,9 +41,6 @@ const getHouseholdById = async (req: Request, res: Response<ApiResponse<Househol
   }
 };
 
-// @desc      Create new household
-// @route     POST /api/v1/households
-// @access    Public
 const createHousehold = async (
   req: Request<{}, {}, HouseholdInputType>,
   res: Response<ApiResponse<HouseholdType>>
@@ -65,9 +61,6 @@ const createHousehold = async (
   }
 };
 
-// @desc      Update household
-// @route     PUT /api/v1/households/:id
-// @access    Public
 const updateHousehold = async (
   req: Request<{ id: string }, {}, Partial<HouseholdInputType>>,
   res: Response<ApiResponse<HouseholdType>>
@@ -82,16 +75,15 @@ const updateHousehold = async (
     }
     res.status(200).json(household);
   } catch (error) {
+    // Send only the error message
+    console.log(error);
     res.status(400).json({ 
-      message: "Error updating household", 
-      error: error instanceof Error ? error : String(error)
+      error: error instanceof Error ? error.message : "Error updating household",
+      success: false,
     });
   }
 };
 
-// @desc      Complete household survey
-// @route     PUT /api/v1/households/:id/complete
-// @access    Public
 const completeSurvey = async (
   req: Request<{ id: string }, {}, Partial<HouseholdInputType>>,
   res: Response<ApiResponse<HouseholdType>>
@@ -118,9 +110,6 @@ const completeSurvey = async (
   }
 };
 
-// @desc      Delete household
-// @route     DELETE /api/v1/households/:id
-// @access    Public
 const deleteHousehold = async (
   req: Request<{ id: string }>,
   res: Response<ApiResponse<{ message: string }>>

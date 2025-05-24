@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, Query } from "mongoose";
 import { HouseholdType } from "../types/HouseholdTypes";
 import { HousingTypeEnum } from "../types/HouseholdTypes";
 import { EnvironmentalPracticeEnum, SurveyStatusEnum } from "../types/HouseholdTypes";
@@ -21,7 +21,7 @@ const familyMemberSchema = new Schema({
 
 const focalPointSchema = new Schema(
   {
-    firstName: { type: String, required: true },
+    firstName: { type: String },
     pictureUrl: { type: String },
     [indexedFields.FOCAL_POINT_EMAIL]: { type: String, required: true },
   },
@@ -46,14 +46,13 @@ const householdSchema = new Schema(
     dateSurveyed: { type: Date },
     focalPoint: { type: focalPointSchema, required: true },
     familyMembers: [familyMemberSchema],
-    numberOfCars: { type: Number, required: true, min: 0 },
-    hasPets: { type: Boolean, required: true },
+    numberOfCars: { type: Number, min: 0 },
+    hasPets: { type: Boolean },
     numberOfPets: { type: Number, min: 0 },
     housingType: {
       type: {
         value: {
           type: String,
-          required: true,
           enum: Object.values(HousingTypeEnum),
         },
         customValue: {
@@ -71,7 +70,6 @@ const householdSchema = new Schema(
           },
         },
       },
-      required: true,
     },
     environmentalPractices: [
       {
@@ -82,6 +80,8 @@ const householdSchema = new Schema(
   },
   {
     timestamps: true,
+    // Allow partial documents during initial creation
+    // strict: false
   }
 );
 
@@ -92,7 +92,6 @@ const householdSchema = new Schema(
  */
 householdSchema.index({ [indexedFields.SLUG]: 1 }, { unique: true });
 householdSchema.index({ [indexedFields.FOCAL_POINT_EMAIL]: 1 });
-
 
 function generateSlug(familyName: string): string {
   // Generate the slug part using slugify with strict mode
@@ -126,6 +125,64 @@ householdSchema.pre("validate", function (next) {
 
   next();
 });
+
+/**
+ * Pre-save hook to validate completed survey data
+ * Works with both save and findByIdAndUpdate operations
+ */
+householdSchema.pre("save", function (this: HouseholdType & Document, next: mongoose.CallbackWithoutResultAndOptionalError) {
+  validateCompletedSurvey(this, next);
+});
+
+// Use findOneAndUpdate for both findOneAndUpdate and findByIdAndUpdate
+householdSchema.pre("findOneAndUpdate", function (this: Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
+  const doc = this.getUpdate() as Partial<HouseholdType>;
+  validateCompletedSurvey(doc, next);
+});
+
+function validateCompletedSurvey(doc: Partial<HouseholdType>, next: mongoose.CallbackWithoutResultAndOptionalError) {
+  // Only validate if status is being changed to completed
+  if (doc.surveyStatus === SurveyStatusEnum.COMPLETED) {
+    const requiredFields = [
+      "familyName",
+      "address",
+      "focalPoint.firstName",
+      "focalPoint.email",
+      "familyMembers",
+      "numberOfCars",
+      "hasPets",
+      "housingType.value",
+      "dateSurveyed"
+    ];
+
+    const missingFields = requiredFields.filter(field => {
+      const value = field.split('.').reduce((obj: any, key) => obj?.[key], doc);
+      return value === undefined || value === null || value === '';
+    });
+
+    if (missingFields.length > 0) {
+      return next(new Error(`Cannot complete survey. Missing required fields: ${missingFields.join(', ')}`));
+    }
+
+    // Validate family members array is not empty
+    if (!doc.familyMembers || doc.familyMembers.length === 0) {
+      return next(new Error("Cannot complete survey. At least one family member is required."));
+    }
+
+    // Validate numberOfPets if hasPets is true
+    if (doc.hasPets && (!doc.numberOfPets || doc.numberOfPets <= 0)) {
+      return next(new Error("Cannot complete survey. Number of pets must be greater than 0 when hasPets is true."));
+    }
+
+    // Validate housing type customValue if value is "Other"
+    if (doc.housingType?.value === HousingTypeEnum.OTHER && 
+        (!doc.housingType.customValue || doc.housingType.customValue.trim() === '')) {
+      return next(new Error("Cannot complete survey. Custom housing type value is required when type is 'Other'."));
+    }
+  }
+
+  next();
+}
 
 export const HouseholdModel = mongoose.model<HouseholdType & Document>(
   "Household",

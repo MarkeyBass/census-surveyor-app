@@ -1,5 +1,21 @@
 [
   {
+    "familyName": "New Survey Family",
+    "address": "303 Fresh Start Blvd, Newtown, WA 98101",
+    "surveyStatus": "pending",
+    "focalPoint": {
+      "email": "new.survey@email.com"
+    }
+  },
+  {
+    "familyName": "Pending Survey Family",
+    "address": "404 Waiting Lane, Upcoming, MA 02108",
+    "surveyStatus": "pending",
+    "focalPoint": {
+      "email": "pending.survey@email.com"
+    }
+  },
+  {
     "familyName": "Smith Family",
     "address": "123 Main Street, Anytown, CA 90210",
     "surveyStatus": "completed",
