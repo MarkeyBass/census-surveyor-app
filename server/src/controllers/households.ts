@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { HouseholdModel } from "../models/Household";
-import { HouseholdInputType, HouseholdType } from "../types/HouseholdTypes";
+import { HouseholdInputType, HouseholdType, HouseholdUpdateType } from "../types/HouseholdTypes";
 import asyncHandler from "../middleware/async";
 import { ErrorResponse } from "../middleware/error";
 
@@ -91,6 +91,34 @@ const deleteHousehold = asyncHandler<{ id: string }>(
   }
 );
 
+const adminUpdateHousehold = asyncHandler<{ id: string }, {}, HouseholdUpdateType>(
+  async (
+    req: Request<{ id: string }, {}, HouseholdUpdateType>,
+    res: Response<ApiResponse<HouseholdType>>
+  ) => {
+    const household = await HouseholdModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        ...req.body,
+        isAdminUpdate: true,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!household) {
+      throw new ErrorResponse(`Household not found with id of ${req.params.id}`, 404);
+    }
+
+    res.status(200).json({
+      success: true,
+      data: household,
+    });
+  }
+);
+
 const householdController = {
   getAllHouseholds,
   getHouseholdById,
@@ -98,6 +126,7 @@ const householdController = {
   updateHousehold,
   completeSurvey,
   deleteHousehold,
+  adminUpdateHousehold,
 };
 
 export default householdController;

@@ -83,3 +83,7 @@ export type HouseholdType = z.infer<typeof householdSchema> & {
  * Household data for API requests
  */
 export type HouseholdInputType = z.infer<typeof householdSchema>;
+
+export type HouseholdUpdateType = Partial<HouseholdType> & {
+  isAdminUpdate?: boolean;
+};

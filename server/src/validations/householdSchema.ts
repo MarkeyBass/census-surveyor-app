@@ -28,8 +28,6 @@ export const familyMemberSchema = z.object({
 /**
  * Validation schema for focal point data
  */
-// TODO: do not allow to change email - make it immutable here
-// TODO: Create seperate endpoint for email change (admin only)
 export const focalPointSchema = z.object({
   firstName: z.string().max(50, "First name must be less than 50 characters").optional(),
   pictureUrl: z.string().url("Invalid URL format").max(500, "URL is too long").optional(),
@@ -45,7 +43,6 @@ export const focalPointUpdateSchema = focalPointSchema.partial();
 /**
  * Validation schema for household data
  */
-// TODO: make email immutable
 export const householdSchema = z.object({
   familyName: z
     .string()

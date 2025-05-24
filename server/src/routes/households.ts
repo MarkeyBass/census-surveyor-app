@@ -46,6 +46,18 @@ router.post("/", validateRequest(householdCreateSchema), householdController.cre
 router.put("/:id", validateRequest(householdUpdateSchema), householdController.updateHousehold);
 
 /**
+ * @route   PUT /api/households/:id/admin-update
+ * @desc    Admin update household
+ * @access  Private (Admin)
+ * @body    Partial household data
+ */
+router.put(
+  "/:id/admin-update",
+  validateRequest(householdUpdateSchema),
+  householdController.adminUpdateHousehold
+);
+
+/**
  * @route   POST /api/households/:id/complete-survey
  * @desc    Complete household survey
  * @access  Private (Surveyor or Admin)
