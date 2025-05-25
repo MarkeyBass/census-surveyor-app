@@ -8,8 +8,7 @@ import {
 import sharp from "sharp";
 import { ErrorResponse } from "../middleware/error";
 import { NextFunction } from "express";
-import { Model } from "mongoose";
-import { HouseholdType } from "@/types/HouseholdTypes";
+import { Model, Document } from "mongoose";
 
 const reduceImageQuality = async (imageFile: any, next: NextFunction) => {
   // reduce image quality
@@ -63,7 +62,7 @@ const reduceImageQuality = async (imageFile: any, next: NextFunction) => {
   }
 };
 
-export const uploadPhotoToS3 = async ({
+export const uploadPhotoToS3 = async <T extends Document>({
   accessKeyId,
   secretAccessKey,
   region,
@@ -71,6 +70,7 @@ export const uploadPhotoToS3 = async ({
   bucketName,
   file,
   dbRecordInstance,
+  imagePath,
   next,
   doReduceImageQuality,
 }: {
@@ -80,7 +80,8 @@ export const uploadPhotoToS3 = async ({
   s3PhotoUploadPath: string;
   bucketName: string;
   file: any;
-  dbRecordInstance: HouseholdType;
+  dbRecordInstance: T;
+  imagePath: string;
   next: NextFunction;
   doReduceImageQuality: boolean;
 }) => {
@@ -106,9 +107,12 @@ export const uploadPhotoToS3 = async ({
   };
 
   // Delete old photo from S3
+  const currentImageUrl = imagePath
+    .split(".")
+    .reduce((obj, key) => obj?.[key], dbRecordInstance as any);
   const isPhotoInDbSavedOnS3 =
-    dbRecordInstance?.focalPoint?.pictureUrl?.includes(".amazonaws.com/") &&
-    dbRecordInstance?.focalPoint?.pictureUrl?.includes(".s3.");
+    currentImageUrl?.includes(".amazonaws.com/") && currentImageUrl?.includes(".s3.");
+
   // Check if photo was saved on same S3 environment as the NODE_ENV before deleting the saved object
   const environmentMatchingMap = {
     production: "cicada-prod-0",
@@ -119,13 +123,9 @@ export const uploadPhotoToS3 = async ({
     environmentMatchingMap[process.env.NODE_ENV as keyof typeof environmentMatchingMap] ===
     bucketName;
 
-  if (
-    isPhotoInDbSavedOnS3 &&
-    isBucketAndEC2EnvMatch &&
-    dbRecordInstance.focalPoint?.pictureUrl === s3PathNew
-  ) {
+  if (isPhotoInDbSavedOnS3 && isBucketAndEC2EnvMatch && currentImageUrl === s3PathNew) {
     const pattern = /\.amazonaws\.com\/(.*)/;
-    const matches = dbRecordInstance.focalPoint?.pictureUrl.match(pattern);
+    const matches = currentImageUrl.match(pattern);
 
     const fileKeyOld = matches ? matches[1] : null;
 

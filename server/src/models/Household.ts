@@ -14,6 +14,10 @@ const indexedFields = {
   FOCAL_POINT_EMAIL: "email",
 } as const;
 
+export const householdModelPaths = {
+  FOCAL_POINT_PICTURE_URL: "focalPoint.pictureUrl",
+} as const;
+
 const familyMemberSchema = new Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { HouseholdModel } from "../models/Household";
+import { HouseholdModel, householdModelPaths } from "../models/Household";
 import {
   HouseholdInputType,
   HouseholdType,
@@ -260,6 +260,7 @@ export const focalPointProfilePhotoUpload = asyncHandler<{ id: string }>(
         bucketName: process.env.S3_BUCKET || "",
         file,
         dbRecordInstance: household,
+        imagePath: householdModelPaths.FOCAL_POINT_PICTURE_URL,
         next,
         doReduceImageQuality: true,
       });
