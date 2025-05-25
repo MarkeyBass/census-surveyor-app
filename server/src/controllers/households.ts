@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 import { HouseholdModel } from "../models/Household";
-import { HouseholdInputType, HouseholdType, HouseholdUpdateType, SurveyStatusEnum } from "../types/HouseholdTypes";
+import {
+  HouseholdInputType,
+  HouseholdType,
+  HouseholdUpdateType,
+  SurveyStatusEnum,
+} from "../types/HouseholdTypes";
 import asyncHandler from "../middleware/async";
 import { ErrorResponse } from "../middleware/error";
 
@@ -104,12 +109,8 @@ export const updateHousehold = asyncHandler<{ id: string }, {}, Partial<Househol
  * @returns {Promise<void>} Sends response with updated household
  * @throws {ErrorResponse} If household not found or validation fails
  */
-// TODO: consider running schema validation inside the controller after fetching existingHousehold
 export const completeSurvey = asyncHandler<{ id: string }>(
-  async (
-    req: Request<{ id: string }>,
-    res: Response<ApiResponse<HouseholdType>>
-  ) => {
+  async (req: Request<{ id: string }>, res: Response<ApiResponse<HouseholdType>>) => {
     // First check if household exists
     const existingHousehold = await HouseholdModel.findById(req.params.id);
     if (!existingHousehold) {
@@ -121,12 +122,12 @@ export const completeSurvey = asyncHandler<{ id: string }>(
       { _id: req.params.id },
       {
         $set: {
-          surveyStatus: SurveyStatusEnum.COMPLETED
-        }
+          surveyStatus: SurveyStatusEnum.COMPLETED,
+        },
       },
-      { 
+      {
         new: true,
-        runValidators: true
+        runValidators: true,
       }
     );
 

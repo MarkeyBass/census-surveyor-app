@@ -133,7 +133,6 @@ householdSchema.pre("validate", function (next) {
   }
 });
 
-
 function validateCompletedSurvey(
   doc: Partial<HouseholdType>,
 ) {

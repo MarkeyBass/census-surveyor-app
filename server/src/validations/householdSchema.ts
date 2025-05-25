@@ -107,7 +107,6 @@ export const householdUpdateSchema = householdSchema.partial().extend({
   focalPoint: focalPointUpdateSchema,
 });
 
-// TODO: move the date creation to mongoose custom hook
 /**
  * Validation schema for completing a survey
  * Extends the base schema but enforces completed status and required date
