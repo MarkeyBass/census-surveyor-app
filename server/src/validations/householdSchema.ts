@@ -108,14 +108,6 @@ export const householdUpdateSchema = householdSchema.partial().extend({
 });
 
 /**
- * Validation schema for completing a survey
- * Extends the base schema but enforces completed status and required date
- */
-export const completeSurveySchema = householdSchema.extend({
-  surveyStatus: z.literal(SurveyStatusEnum.COMPLETED),
-});
-
-/**
  * Validation schema for initial household creation (Admin only)
  * Only requires essential fields for initial setup
  */

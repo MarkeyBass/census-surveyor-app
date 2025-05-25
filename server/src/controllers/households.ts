@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { HouseholdModel } from "../models/Household";
 import {
   HouseholdInputType,
@@ -8,6 +8,9 @@ import {
 } from "../types/HouseholdTypes";
 import asyncHandler from "../middleware/async";
 import { ErrorResponse } from "../middleware/error";
+import path from "path";
+import { uploadPhotoToS3 } from "../utils/s3";
+import { UploadedFile } from "../types/FilesTypes";
 
 /**
  * Standard API response structure
@@ -192,5 +195,85 @@ export const deleteHousehold = asyncHandler<{ id: string }>(
       throw new ErrorResponse(`Household not found with id of ${req.params.id}`, 404);
     }
     res.status(200).json({ success: true, data: null });
+  }
+);
+
+/**
+ * Upload a profile photo for a household's focal point
+ * @description Handles file upload, validation, and storage in S3 for a household's focal point profile photo
+ * @route PUT /api/v1/households/:id/focal-point-photo
+ * @access Private
+ * @param {string} id - The household ID
+ * @param {File} file - The image file to upload
+ * @returns {Promise<void>} Sends response with upload details
+ * @throws {ErrorResponse}
+ * - 404: If household not found
+ * - 400: If no file uploaded, invalid file type, or file too large
+ * - 500: If file upload to S3 fails
+ */
+export const focalPointProfilePhotoUpload = asyncHandler<{ id: string }>(
+  async (req: Request, res: Response, next: NextFunction) => {
+    let household = await HouseholdModel.findById(req.params.id);
+
+    if (!household) {
+      return next(new ErrorResponse(`User not found.`, 404));
+    }
+
+    if (!req.files) {
+      return next(new ErrorResponse(`Please upload a file`, 400));
+    }
+
+    // Get the file from req.files
+    const file = req.files.file as UploadedFile;
+
+    if (!file) {
+      return next(new ErrorResponse(`Please upload a file`, 400));
+    }
+
+    // Make sure that the image is a photo
+    if (!file.mimetype.startsWith("image")) {
+      return next(new ErrorResponse(`Please upload an image file`, 400));
+    }
+
+    const maxFileSizeToUpload = Number(process.env.MAX_FILE_SIZE_TO_UPLOAD) || 5000000;
+    const maxFileSizeToUploadInMB = maxFileSizeToUpload / 1000000;
+
+    // Check filesize
+    if (file.size > maxFileSizeToUpload) {
+      return next(
+        new ErrorResponse(
+          `You can upload an image with max size of ${maxFileSizeToUploadInMB} MB`,
+          400
+        )
+      );
+    }
+
+    // Create custom filename
+    file.name = `photo_${household.id}${path.parse(file.name || "").ext}`;
+
+    try {
+      const { data: s3ResData, s3Path } = await uploadPhotoToS3({
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "",
+        region: process.env.S3_REGION || "",
+        s3PhotoUploadPath: process.env.S3_USER_PROFILE_PHOTO_UPLOAD_PATH || "",
+        bucketName: process.env.S3_BUCKET || "",
+        file,
+        dbRecordInstance: household,
+        next,
+        doReduceImageQuality: true,
+      });
+
+      household.focalPoint.pictureUrl = s3Path;
+      await household.save();
+
+      res.status(201).json({
+        success: true,
+        data: { filename: file.name, s3ResData, s3Path, household: household.toObject() },
+      });
+    } catch (err) {
+      console.log("Error", err);
+      return next(new ErrorResponse(`File upload failed`, 500));
+    }
   }
 );

@@ -14,14 +14,17 @@
     "seed:delete": "ts-node src/db/seeder.ts -d"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.817.0",
+    "@types/express-fileupload": "^1.5.1",
     "colors": "^1.4.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "express-fileupload": "^1.5.1",
     "helmet": "^7.1.0",
     "mongoose": "^8.1.0",
     "morgan": "^1.10.0",
-    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.34.2",
     "slugify": "^1.6.6",
     "zod": "^3.25.20"
   },

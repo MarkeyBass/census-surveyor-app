@@ -7,32 +7,30 @@ import {
   completeSurvey,
   deleteHousehold,
   adminUpdateHousehold,
+  focalPointProfilePhotoUpload,
 } from "../controllers/households";
 import { validateRequest } from "../middleware/validateRequest";
-import {
-  householdUpdateSchema,
-  completeSurveySchema,
-  householdCreateSchema,
-} from "../validations/householdSchema";
+import { householdUpdateSchema, householdCreateSchema } from "../validations/householdSchema";
 
 const router = express.Router();
 
-router.get("/", getAllHouseholds);
+router
+  .route("/")
+  .get(getAllHouseholds)
+  .post(validateRequest(householdCreateSchema), createHousehold);
 
-router.get("/:id", getHouseholdById);
-
-router.post("/", validateRequest(householdCreateSchema), createHousehold);
-
-router.put("/:id", validateRequest(householdUpdateSchema), updateHousehold);
+router
+  .route("/:id")
+  .get(getHouseholdById)
+  .put(validateRequest(householdUpdateSchema), updateHousehold)
+  .delete(deleteHousehold);
 
 router.put("/:id/admin-update", validateRequest(householdUpdateSchema), adminUpdateHousehold);
 
-// TODO: implement protect and auth middlewares to support private routes (theoretically, not for now) - mau=ybe fetch the data from the db inside the schema or use the schema inside the controller...
-// router.post("/:id/complete-survey", validateRequest(completeSurveySchema), completeSurvey);
 router.put("/:id/complete-survey", completeSurvey);
 
-router.delete("/:id", deleteHousehold);
+router.put("/:id/focal-point-photo", focalPointProfilePhotoUpload);
+
+// TODO: implement protect and auth middlewares to support private routes (theoretically, not for now)
 
 export default router;
-
-
