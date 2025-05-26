@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Checkbox } from "./ui/checkbox";
 import { Switch } from "./ui/switch";
 import { Separator } from "./ui/separator";
-import { surveyCompletionSchema } from "@/lib/validations/household";
+import { surveyCompletionSchema, householdUpdateSchema } from "@/lib/validations/household";
 import { ZodError } from "zod";
 import { CheckedState } from "@radix-ui/react-checkbox";
 
@@ -179,6 +179,11 @@ export function EditHouseholdModal({
         );
       }
 
+      const body = {
+        ...formData,
+        surveyStatus: SurveyStatusEnum.COMPLETED,
+      };
+
       const response = await fetch(
         `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${household._id}`,
         {
@@ -186,7 +191,7 @@ export function EditHouseholdModal({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(body),
         }
       );
 
@@ -210,6 +215,69 @@ export function EditHouseholdModal({
       const errorMessage =
         error instanceof Error ? error.message : "Failed to update household. Please try again.";
       toast.error("Error updating household", {
+        description: <span style={{ color: "#fee2e2" }}>{errorMessage}</span>,
+        duration: 5000,
+        style: {
+          background: "#ef4444",
+          color: "white",
+        },
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    setIsLoading(true);
+
+    try {
+      // Basic validation using householdUpdateSchema
+      try {
+        householdUpdateSchema.parse(formData);
+      } catch (error) {
+        if (error instanceof ZodError) {
+          const errors = error.errors.map(err => ({
+            path: err.path.join('.'),
+            message: err.message
+          }));
+          throw new Error(
+            `Please fix the following issues:\n${errors
+              .map(err => `${err.path}: ${err.message}`)
+              .join('\n')}`
+          );
+        }
+        throw error;
+      }
+
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${household._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || `HTTP error! status: ${response.status}`);
+      }
+
+      onUpdate(data.data);
+      toast.success("Changes saved", {
+        description: <span style={{ color: "#dcfce7" }}>Your changes have been saved temporarily.</span>,
+        duration: 3000,
+        style: {
+          background: "#22c55e",
+          color: "white",
+        },
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to save changes. Please try again.";
+      toast.error("Error saving changes", {
         description: <span style={{ color: "#fee2e2" }}>{errorMessage}</span>,
         duration: 5000,
         style: {
@@ -481,7 +549,7 @@ export function EditHouseholdModal({
 
           <Separator />
 
-          {/* Survey Status Section */}
+          {/* Survey Status Section
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Survey Status</h3>
             <div className="space-y-2">
@@ -503,14 +571,22 @@ export function EditHouseholdModal({
                 </SelectContent>
               </Select>
             </div>
-          </div>
+          </div> */}
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={handleSaveChanges}
+              disabled={isLoading}
+            >
+              Save Changes
+            </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saving..." : "Submit Changes"}
+              {isLoading ? "Submitting..." : "Complete Survey"}
             </Button>
           </div>
         </form>
