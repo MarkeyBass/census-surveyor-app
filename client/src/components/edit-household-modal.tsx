@@ -411,12 +411,12 @@ export function EditHouseholdModal({
               currentPhotoUrl={household.focalPoint.pictureUrl}
               householdId={household._id}
               onPhotoUpdate={(newPhotoUrl) => {
-                setFormData(prev => ({
+                setFormData((prev) => ({
                   ...prev,
                   focalPoint: {
                     ...prev.focalPoint,
-                    pictureUrl: newPhotoUrl
-                  }
+                    pictureUrl: newPhotoUrl,
+                  },
                 }));
               }}
             />
@@ -572,20 +572,31 @@ export function EditHouseholdModal({
 
           <Separator />
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button className="cursor-pointer" type="button" variant="outline" onClick={onClose}>
+          <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
+            <Button 
+              className="w-full sm:w-auto cursor-pointer" 
+              type="button" 
+              variant="outline" 
+              onClick={onClose}
+            >
               Cancel
             </Button>
-            <Button
-              className="cursor-pointer"
-              type="button"
-              variant="outline"
-              onClick={() => handleSave("save")}
+            {formData.surveyStatus === SurveyStatusEnum.PENDING && (
+              <Button
+                className="w-full sm:w-auto cursor-pointer"
+                type="button"
+                variant="outline"
+                onClick={() => handleSave("save")}
+                disabled={isLoading}
+              >
+                Save Changes
+              </Button>
+            )}
+            <Button 
+              className="w-full sm:w-auto cursor-pointer" 
+              type="submit" 
               disabled={isLoading}
             >
-              Save Changes
-            </Button>
-            <Button className="cursor-pointer" type="submit" disabled={isLoading}>
               {isLoading ? "Submitting..." : "Complete Survey"}
             </Button>
           </div>
