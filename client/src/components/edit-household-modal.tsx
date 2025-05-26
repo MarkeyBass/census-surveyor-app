@@ -181,6 +181,8 @@ export function EditHouseholdModal({
   const handleSave = async (mode: "save" | "complete") => {
     setIsLoading(true);
 
+    console.log("formData", formData);
+
     try {
       // Validate based on mode
       if (mode === "complete") {

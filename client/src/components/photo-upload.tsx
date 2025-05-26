@@ -45,6 +45,7 @@ export function PhotoUpload({ currentPhotoUrl, householdId, onPhotoUpdate }: Pho
     const reader = new FileReader();
     reader.onloadend = () => {
       setPreviewUrl(reader.result as string);
+      setIsImageLoading(true); // Reset loading state for new image
     };
     reader.readAsDataURL(file);
 
@@ -77,6 +78,18 @@ export function PhotoUpload({ currentPhotoUrl, householdId, onPhotoUpdate }: Pho
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const handleImageLoad = () => {
+    setIsImageLoading(false);
+  };
+
+  const handleImageError = () => {
+    setIsImageLoading(false);
+    setPreviewUrl(null);
+    toast.error("Failed to load image", {
+      description: "Please try uploading again",
+    });
   };
 
   return (
@@ -121,6 +134,8 @@ export function PhotoUpload({ currentPhotoUrl, householdId, onPhotoUpdate }: Pho
                 <AvatarImage
                   src={previewUrl}
                   alt="Profile preview"
+                  onLoad={handleImageLoad}
+                  onError={handleImageError}
                 />
                 <AvatarFallback className="bg-primary/10">
                   {isImageLoading ? (

@@ -63,17 +63,7 @@ export const householdSchema = z.object({
     .number()
     .int()
     .min(0, "Number of pets must be a non-negative integer")
-    .optional()
-    .refine(
-      (val) => {
-        // If hasPets is true, numberOfPets must be provided and greater than 0
-        if (val === undefined) return true;
-        return val > 0;
-      },
-      {
-        message: "Number of pets must be greater than 0 if hasPets is true",
-      }
-    ),
+    .optional(),
   housingType: z
     .object({
       value: z.enum(Object.values(HousingTypeEnum) as [string, ...string[]], {
