@@ -37,13 +37,7 @@ export const householdSchema = z.object({
   familyMembers: z.array(familyMemberSchema).min(1, "At least one family member is required"),
   numberOfCars: z.number().min(0, "Number of cars must be 0 or greater"),
   hasPets: z.boolean(),
-  numberOfPets: z.number().optional().refine(
-    (val) => {
-      if (val === undefined) return true;
-      return val > 0;
-    },
-    { message: "Number of pets must be greater than 0 when has pets is true" }
-  ),
+  numberOfPets: z.number().optional(),
   housingType: housingTypeSchema,
   environmentalPractices: z.array(z.string()).optional(),
 });

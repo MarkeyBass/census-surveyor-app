@@ -181,7 +181,6 @@ export function EditHouseholdModal({
   const handleSave = async (mode: "save" | "complete") => {
     setIsLoading(true);
 
-    console.log("formData", formData);
 
     try {
       // Validate based on mode
@@ -216,6 +215,7 @@ export function EditHouseholdModal({
       const body = {
         ...formData,
         ...(mode === "complete" ? { surveyStatus: SurveyStatusEnum.COMPLETED } : {}),
+        ...(formData.hasPets === false && { numberOfPets: 0 }),
       };
 
       const response = await fetch(
@@ -535,11 +535,11 @@ export function EditHouseholdModal({
                     id="numberOfPets"
                     type="number"
                     min="1"
-                    value={formData.numberOfPets}
+                    value={formData.numberOfPets && formData.numberOfPets > 0 ? formData.numberOfPets : 1}
                     onChange={(e) =>
-                      handleFieldChange("numberOfPets", parseInt(e.target.value) || 0)
+                      handleFieldChange("numberOfPets", parseInt(e.target.value) || 1)
                     }
-                    onBlur={(e) => handleFieldBlur("numberOfPets", parseInt(e.target.value) || 0)}
+                    onBlur={(e) => handleFieldBlur("numberOfPets", parseInt(e.target.value) || 1)}
                     required
                   />
                   {touchedFields.has("numberOfPets") && fieldErrors["numberOfPets"] && (
@@ -583,7 +583,7 @@ export function EditHouseholdModal({
             >
               Cancel
             </Button>
-            {formData.surveyStatus === SurveyStatusEnum.PENDING && (
+            {household.surveyStatus === SurveyStatusEnum.PENDING && (
               <Button
                 className="w-full sm:w-auto cursor-pointer"
                 type="button"
