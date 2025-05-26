@@ -2,15 +2,17 @@
 
 import { Household } from "@/types/household";
 import { HouseholdCard } from "@/components/household-card";
+import { useRouter } from "next/navigation";
 
 interface HouseholdListProps {
   households: Household[];
 }
 
 export function HouseholdList({ households }: HouseholdListProps) {
-  const handleHouseholdClick = (householdId: string) => {
-    // TODO: Implement navigation to household details
-    console.log('Clicked household:', householdId);
+  const router = useRouter();
+
+  const handleNavigateToHouseholdDetalsPage = (householdId: string) => {
+    router.push(`/households/${householdId}`);
   };
 
   return (
@@ -19,7 +21,7 @@ export function HouseholdList({ households }: HouseholdListProps) {
         <HouseholdCard
           key={household._id}
           household={household}
-          onClick={() => handleHouseholdClick(household._id)}
+          onClick={() => handleNavigateToHouseholdDetalsPage(household._id)}
         />
       ))}
     </div>

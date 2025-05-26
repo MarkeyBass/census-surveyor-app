@@ -2,16 +2,19 @@
 export enum HousingTypeEnum {
   APARTMENT = "Apartment",
   HOUSE = "House",
-  CONDO = "Condo",
+  CONDOMINIUM = "Condominium",
+  DUPLEX = "Duplex",
+  MOBILE_HOME = "Mobile home",
   OTHER = "Other"
 }
 
 export enum EnvironmentalPracticeEnum {
   RECYCLING = "Recycling",
-  COMPOSTING = "Composting",
-  SOLAR_PANELS = "Solar Panels",
-  WATER_CONSERVATION = "Water Conservation",
-  ENERGY_EFFICIENT_APPLIANCES = "Energy Efficient Appliances"
+  COMPOSTING = "Composting food scraps",
+  WATER_CONSERVATION = "Conserving water",
+  PLASTIC_REDUCTION = "Reducing plastic use",
+  REUSABLE_BAGS = "Using reusable shopping bags",
+  LOCAL_INITIATIVES = "Participating in local environmental initiatives"
 }
 
 export enum SurveyStatusEnum {
@@ -27,8 +30,8 @@ export interface FamilyMember {
 
 export interface FocalPoint {
   firstName?: string;
-  pictureUrl?: string;
   email: string;
+  pictureUrl?: string;
 }
 
 export interface HousingType {

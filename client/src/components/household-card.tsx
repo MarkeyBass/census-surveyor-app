@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
+import { Badge, getBadgeVariant } from "@/components/ui/badge";
 
 interface HouseholdCardProps {
   household: Household;
@@ -19,16 +19,7 @@ interface HouseholdCardProps {
 }
 
 export function HouseholdCard({ household, onClick }: HouseholdCardProps) {
-  const getBadgeVariant = (status: SurveyStatusEnum) => {
-    switch (status) {
-      case SurveyStatusEnum.COMPLETED:
-        return "green";
-      case SurveyStatusEnum.PENDING:
-        return "yellow";
-      default:
-        return "grey";
-    }
-  };
+
 
   return (
     <Card className="w-full cursor-pointer hover:shadow-lg transition-shadow" onClick={onClick}>
