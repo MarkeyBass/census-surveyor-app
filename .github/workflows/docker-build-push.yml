@@ -2,10 +2,8 @@ name: Build, Push and Deploy
 
 on:
   push:
-    branches: [ main ]
     tags: [ 'v*' ]
-  pull_request:
-    branches: [ main ]
+  # Removed main branch trigger to avoid double runs
 
 env:
   REGISTRY: docker.io
@@ -41,14 +39,13 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.SERVER_IMAGE_NAME }}
           tags: |
             type=ref,event=tag
-            type=ref,event=branch
             type=sha,format=short
 
       - name: Build and push client image
         uses: docker/build-push-action@v5
         with:
           context: ./client
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
@@ -58,7 +55,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./server
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
@@ -66,7 +63,6 @@ jobs:
 
   deploy:
     needs: build-and-push
-    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
