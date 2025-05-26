@@ -10,7 +10,7 @@ import { Badge, getBadgeVariant } from "./ui/badge";
 import { Separator } from "./ui/separator";
 import { HousingTypeEnum } from "@/types/household";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { User, Users } from "lucide-react";
+import { User, Users, Pencil } from "lucide-react";
 
 interface HouseholdDetailsProps {
   household: Household;
@@ -22,18 +22,25 @@ export function HouseholdDetails({ household: initialHousehold }: HouseholdDetai
 
   const getInitials = (name: string) => {
     return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
       .toUpperCase()
       .slice(0, 2);
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-        <h1 className="text-2xl font-bold">Household Details</h1>
-        <Button onClick={() => setIsEditModalOpen(true)}>Edit Household</Button>
+      <div className="sticky top-5 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-8 pb-4 px-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">
+            <span className="hidden sm:inline">Household Details</span>
+          </h1>
+          <Button className="cursor-pointer gap-2" onClick={() => setIsEditModalOpen(true)}>
+            <Pencil className="h-4 w-4" />
+            <span className="hidden sm:inline">Edit Household</span>
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -64,8 +71,8 @@ export function HouseholdDetails({ household: initialHousehold }: HouseholdDetai
               <div>
                 <p className="text-sm text-muted-foreground">Housing Type</p>
                 <p className="text-base font-medium">
-                  {household.housingType?.value === HousingTypeEnum.OTHER 
-                    ? household.housingType.customValue 
+                  {household.housingType?.value === HousingTypeEnum.OTHER
+                    ? household.housingType.customValue
                     : household.housingType?.value || "N/A"}
                 </p>
               </div>
@@ -84,8 +91,8 @@ export function HouseholdDetails({ household: initialHousehold }: HouseholdDetai
             <div className="flex flex-col sm:flex-row gap-6">
               <div className="flex flex-col items-center gap-2">
                 <Avatar className="h-24 w-24">
-                  <AvatarImage 
-                    src={household.focalPoint.pictureUrl} 
+                  <AvatarImage
+                    src={household.focalPoint.pictureUrl}
                     alt={household.focalPoint.firstName || "Focal Point"}
                   />
                   <AvatarFallback className="bg-primary/10">
@@ -120,7 +127,10 @@ export function HouseholdDetails({ household: initialHousehold }: HouseholdDetai
               {household.familyMembers && household.familyMembers.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {household.familyMembers.map((member, index) => (
-                    <div key={index} className="flex items-start space-x-3 p-3 rounded-lg border bg-card">
+                    <div
+                      key={index}
+                      className="flex items-start space-x-3 p-3 rounded-lg border bg-card"
+                    >
                       <Avatar className="h-10 w-10">
                         <AvatarFallback className="bg-primary/10">
                           {getInitials(`${member.firstName} ${member.lastName}`)}
@@ -169,12 +179,12 @@ export function HouseholdDetails({ household: initialHousehold }: HouseholdDetai
               </div>
               <div className="space-y-1">
                 <p className="text-base font-medium">
-                  {household.hasPets 
-                    ? `${household.numberOfPets} Pet${household.numberOfPets === 1 ? '' : 's'}`
+                  {household.hasPets
+                    ? `${household.numberOfPets} Pet${household.numberOfPets === 1 ? "" : "s"}`
                     : "No Pets"}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {household.hasPets 
+                  {household.hasPets
                     ? "Living in the household"
                     : "Currently no pets in the household"}
                 </p>
@@ -213,7 +223,9 @@ export function HouseholdDetails({ household: initialHousehold }: HouseholdDetai
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Created</p>
-                <p className="text-base font-medium">{format(new Date(household.createdAt), "PPP")}</p>
+                <p className="text-base font-medium">
+                  {format(new Date(household.createdAt), "PPP")}
+                </p>
               </div>
               {household.dateSurveyed && (
                 <div>
@@ -236,4 +248,4 @@ export function HouseholdDetails({ household: initialHousehold }: HouseholdDetai
       />
     </div>
   );
-} 
+}
