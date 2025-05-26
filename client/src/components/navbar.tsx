@@ -19,7 +19,7 @@ export default function NavBar() {
                   width={25}
                 />
                 <h2>
-                  Census Surveyor<span className="hidden sm:inline"> - For Your Houshold</span>
+                  Census Surveyor<span className="hidden sm:inline"> - Houshold Statistics</span>
                 </h2>
               </div>
             </Link>

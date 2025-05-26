@@ -1,66 +1,60 @@
-"use client";
-
 // TODO: check!!!
-import { useEffect, useState } from "react";
+import { Suspense } from "react";
 import { Household } from "@/types/household";
-import { householdService } from "@/services/householdService";
-import { HouseholdCard } from "@/components/household-card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { HouseholdList } from "@/components/household-list";
+import Loading from "./loading";
+import { API_CONFIG } from "@/config/constants";
 
-export default function Home() {
-  const [households, setHouseholds] = useState<Household[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+async function getHouseholds(): Promise<Household[]> {
+  /**
+   * Test Utilities
+   * --------------
+   * Uncomment these lines to test different states:
+   * 
+   * 1. Loading State Test:
+   *    - Adds a 2-second delay to simulate slow network
+   *    - Useful for testing loading UI and transitions
+   */
+  // await new Promise(resolve => setTimeout(resolve, 2000));
 
-  useEffect(() => {
-    const fetchHouseholds = async () => {
-      try {
-        const data = await householdService.getAllHouseholds();
-        setHouseholds(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch households');
-      } finally {
-        setLoading(false);
-      }
-    };
+  /**
+   * 2. Error State Test:
+   *    - Simulates a failed request
+   *    - Useful for testing error boundaries and error UI
+   */
+  // throw new Error('test error');
 
-    fetchHouseholds();
-  }, []);
+  const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}`, {
+    // This ensures the request is not cached
+    cache: 'no-store',
+    // This ensures we get fresh data on each request
+    next: { revalidate: 0 }
+  });
 
-  const handleHouseholdClick = (householdId: string) => {
-    // TODO: Implement navigation to household details
-    console.log('Clicked household:', householdId);
-  };
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-destructive">Error: {error}</div>
-      </div>
-    );
+  if (!response.ok) {
+    throw new Error('Failed to fetch households');
   }
 
+  const data = await response.json();
+  return data.data;
+}
+
+async function Households() {
+  const households = await getHouseholds();
+  return <HouseholdList households={households} />;
+}
+
+export default function Home() {
   return (
-    <div className="container mx-auto py-15 px-4">
-      <h1 className="text-3xl font-bold mb-8">Household Surveys</h1>
-      
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <Skeleton key={i} className="h-[200px] w-full" />
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {households.map((household) => (
-            <HouseholdCard
-              key={household._id}
-              household={household}
-              onClick={() => handleHouseholdClick(household._id)}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+    <main className="container mx-auto">
+      <div className="sticky top-5 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <h1 className="text-xl md:text-2xl lg:text-3xl font-bold py-8 pb-4 px-4">Household Surveys - Admin Panel</h1>
+      </div>
+      <div className="px-4 my-8">
+        <Suspense fallback={<Loading />}>
+          <Households />
+        </Suspense>
+      </div>
+    </main>
   );
 }

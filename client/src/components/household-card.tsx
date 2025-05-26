@@ -1,9 +1,17 @@
 "use client";
 
 // TODO: check!!!
-import { Household } from "@/types/household";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Household, SurveyStatusEnum } from "@/types/household";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 
 interface HouseholdCardProps {
   household: Household;
@@ -11,36 +19,55 @@ interface HouseholdCardProps {
 }
 
 export function HouseholdCard({ household, onClick }: HouseholdCardProps) {
+  const getBadgeVariant = (status: SurveyStatusEnum) => {
+    switch (status) {
+      case SurveyStatusEnum.COMPLETED:
+        return "green";
+      case SurveyStatusEnum.PENDING:
+        return "yellow";
+      default:
+        return "grey";
+    }
+  };
+
   return (
-    <Card 
-      className="w-full cursor-pointer hover:shadow-lg transition-shadow"
-      onClick={onClick}
-    >
+    <Card className="w-full cursor-pointer hover:shadow-lg transition-shadow" onClick={onClick}>
       <CardHeader>
-        <CardTitle>
-          {household.address || 'No Address'}
-        </CardTitle>
-        <CardDescription>
-          Created on {format(new Date(household.createdAt), 'PPP')}
-        </CardDescription>
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="text-lg">{household.familyName}</CardTitle>
+            <CardDescription>{household.address}</CardDescription>
+          </div>
+          <Badge variant={getBadgeVariant(household.surveyStatus)}>{household.surveyStatus}</Badge>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {household.city && household.state && (
-            <p className="text-sm text-muted-foreground">
-              {household.city}, {household.state} {household.zipCode}
-            </p>
-          )}
-          {household.residents && (
-            <p className="text-sm text-muted-foreground">
-              {household.residents} {household.residents === 1 ? 'resident' : 'residents'}
-            </p>
-          )}
+          <div className="flex items-center gap-2 text-sm">
+            <span className="font-medium border-b dark:border-gray-200 border-gray-800 pb-1">Focal Point :</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>First Name:</span>
+            <span className="font-medium">{household.focalPoint.firstName || "N/A"}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>Email:</span>
+            <span className="font-medium">{household.focalPoint.email}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>Family Members:</span>
+            <span className="font-medium">{household.familyMembers.length}</span>
+          </div>
         </div>
       </CardContent>
       <CardFooter className="text-sm text-muted-foreground">
-        Last updated: {format(new Date(household.updatedAt), 'PPP')}
+        <div className="flex flex-col items-start justify-between gap-2">
+          <span>Created: {format(new Date(household.createdAt), "PPP")}</span>
+          {household.dateSurveyed && (
+            <span className="font-extrabold text-green-600 dark:text-green-500">Surveyed: {format(new Date(household.dateSurveyed), "PPP")}</span>
+          )}
+        </div>
       </CardFooter>
     </Card>
   );
-} 
+}
