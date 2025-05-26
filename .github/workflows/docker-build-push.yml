@@ -7,8 +7,8 @@ on:
 
 env:
   REGISTRY: docker.io
-  CLIENT_IMAGE_NAME: ${{ github.repository }}-client
-  SERVER_IMAGE_NAME: ${{ github.repository }}-server
+  CLIENT_IMAGE_NAME: ${{ github.repository_owner }}/census-surveyor-app-client
+  SERVER_IMAGE_NAME: ${{ github.repository_owner }}/census-surveyor-app-server
 
 jobs:
   build-and-push:
@@ -30,24 +30,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Extract metadata for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: |
-            ${{ env.REGISTRY }}/${{ env.CLIENT_IMAGE_NAME }}
-            ${{ env.REGISTRY }}/${{ env.SERVER_IMAGE_NAME }}
-          tags: |
-            type=ref,event=tag
-            type=sha,format=short
-
       - name: Build and push client image
         uses: docker/build-push-action@v5
         with:
           context: ./client
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.CLIENT_IMAGE_NAME }}:${{ github.ref_name }}
+            ${{ env.REGISTRY }}/${{ env.CLIENT_IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -56,8 +46,9 @@ jobs:
         with:
           context: ./server
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.SERVER_IMAGE_NAME }}:${{ github.ref_name }}
+            ${{ env.REGISTRY }}/${{ env.SERVER_IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -106,7 +97,7 @@ jobs:
             
             services:
               client:
-                image: ${{ env.REGISTRY }}/${{ env.CLIENT_IMAGE_NAME }}:${TAG:-latest}
+                image: ${{ env.REGISTRY }}/${{ env.CLIENT_IMAGE_NAME }}:${{ github.ref_name }}
                 ports:
                   - "3000:3000"
                 environment:
@@ -116,7 +107,7 @@ jobs:
                   - server
             
               server:
-                image: ${{ env.REGISTRY }}/${{ env.SERVER_IMAGE_NAME }}:${TAG:-latest}
+                image: ${{ env.REGISTRY }}/${{ env.SERVER_IMAGE_NAME }}:${{ github.ref_name }}
                 ports:
                   - "8000:8000"
                 environment:
