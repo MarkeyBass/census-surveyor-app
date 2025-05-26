@@ -5,8 +5,7 @@ import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { toast } from "sonner";
 import { API_CONFIG } from "@/config/constants";
-import { Upload, X, Loader2 } from "lucide-react";
-import Image from "next/image";
+import { Upload, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { User } from "lucide-react";
 
@@ -80,54 +79,25 @@ export function PhotoUpload({ currentPhotoUrl, householdId, onPhotoUpdate }: Pho
     }
   };
 
-  const handleRemovePhoto = () => {
-    setPreviewUrl(null);
-    onPhotoUpdate("");
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((part) => part[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <Label>Profile Photo</Label>
-        <div className="flex gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="cursor-pointer"
-            onClick={() => document.getElementById("photo-upload")?.click()}
-            disabled={isUploading}
-          >
-            {isUploading ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Upload className="h-4 w-4 mr-2" />
-            )}
-            {isUploading ? "Uploading..." : "Upload Photo"}
-          </Button>
-          {previewUrl && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="cursor-pointer"
-              onClick={handleRemovePhoto}
-              disabled={isUploading}
-            >
-              <X className="h-4 w-4 mr-2" />
-              Remove
-            </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="cursor-pointer"
+          onClick={() => document.getElementById("photo-upload")?.click()}
+          disabled={isUploading}
+        >
+          {isUploading ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <Upload className="h-4 w-4 mr-2" />
           )}
-        </div>
+          {isUploading ? "Uploading..." : "Upload Photo"}
+        </Button>
       </div>
 
       <input
