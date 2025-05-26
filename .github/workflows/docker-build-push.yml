@@ -1,4 +1,4 @@
-name: Build and Push Docker Images
+name: Build, Push and Deploy
 
 on:
   push:
@@ -62,4 +62,88 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max 
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create .env file
+        run: |
+          cat << EOF > .env
+          # Docker Hub
+          DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+          
+          # Server Configuration
+          PORT=8000
+          NODE_ENV=production
+          MAX_FILE_SIZE_TO_UPLOAD=5000000
+          
+          # MongoDB
+          MONGODB_URI=${{ secrets.MONGODB_URI }}
+          
+          # AWS S3 Configuration
+          S3_REGION=${{ secrets.S3_REGION }}
+          S3_BUCKET=${{ secrets.S3_BUCKET }}
+          S3_USER_PROFILE_PHOTO_UPLOAD_PATH=${{ secrets.S3_USER_PROFILE_PHOTO_UPLOAD_PATH }}
+          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          EOF
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Create app directory if it doesn't exist
+            mkdir -p /home/ubuntu/app
+            
+            # Copy docker-compose.yml and .env
+            cat > /home/ubuntu/app/docker-compose.yml << 'EOL'
+            version: '3.8'
+            
+            services:
+              client:
+                image: ${{ env.REGISTRY }}/${{ env.CLIENT_IMAGE_NAME }}:${TAG:-latest}
+                ports:
+                  - "3000:3000"
+                environment:
+                  - NODE_ENV=production
+                  - NEXT_PUBLIC_API_URL=http://server:8000/api/v1
+                depends_on:
+                  - server
+            
+              server:
+                image: ${{ env.REGISTRY }}/${{ env.SERVER_IMAGE_NAME }}:${TAG:-latest}
+                ports:
+                  - "8000:8000"
+                environment:
+                  - NODE_ENV=production
+                  - PORT=${PORT:-8000}
+                  - MONGODB_URI=${MONGODB_URI}
+                  - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+                  - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+                  - S3_REGION=${S3_REGION}
+                  - S3_BUCKET=${S3_BUCKET}
+                  - S3_USER_PROFILE_PHOTO_UPLOAD_PATH=${S3_USER_PROFILE_PHOTO_UPLOAD_PATH}
+                  - MAX_FILE_SIZE_TO_UPLOAD=${MAX_FILE_SIZE_TO_UPLOAD}
+            EOL
+            
+            # Copy .env file
+            cat > /home/ubuntu/app/.env << 'EOL'
+            ${{ secrets.ENV_FILE }}
+            EOL
+            
+            # Login to Docker Hub
+            echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+            
+            # Pull and start containers
+            cd /home/ubuntu/app
+            docker-compose pull
+            docker-compose up -d 
