@@ -50,15 +50,20 @@ export function EditHouseholdModal({ household, isOpen, onClose, onUpdate }: Edi
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || `HTTP error! status: ${response.status}`);
+        throw new Error(data.message || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
       onUpdate(data.data);
       toast.success("Household updated successfully", {
-        description: "Your changes have been saved.",
+        description: (
+          <span style={{ color: '#dcfce7' }}>
+            Your changes have been saved.
+          </span>
+        ),
+        duration: 3000,
         style: {
           background: '#22c55e',
           color: 'white',
@@ -66,8 +71,14 @@ export function EditHouseholdModal({ household, isOpen, onClose, onUpdate }: Edi
       });
       onClose();
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to update household. Please try again.";
       toast.error("Error updating household", {
-        description: error instanceof Error ? error.message : "Failed to update household. Please try again.",
+        description: (
+          <span style={{ color: '#fee2e2' }}>
+            {errorMessage || "Failed to update household. Please try again."}
+          </span>
+        ),
+        duration: 5000,
         style: {
           background: '#ef4444',
           color: 'white',
