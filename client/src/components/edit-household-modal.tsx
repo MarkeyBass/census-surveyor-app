@@ -520,30 +520,6 @@ export function EditHouseholdModal({
 
           <Separator />
 
-          {/* Survey Status Section
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Survey Status</h3>
-            <div className="space-y-2">
-              <Select
-                value={formData.surveyStatus}
-                onValueChange={(value: SurveyStatusEnum) => {
-                  handleFieldChange("surveyStatus", value);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select survey status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.values(SurveyStatusEnum).map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div> */}
-
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
