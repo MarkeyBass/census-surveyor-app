@@ -24,14 +24,15 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - NODE_ENV=development
-      - MONGODB_URI=mongodb+srv://mark_k:TaboSpiti2008@nodemongoproject1.3n1rv.mongodb.net/census-surveyor?retryWrites=true&w=majority&appName=NodeMongoProject1
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - MONGODB_URI=${MONGODB_URI}
+      - PORT=${PORT:-8000}
+      - NODE_ENV=${NODE_ENV:-development}
+      - MAX_FILE_SIZE_TO_UPLOAD=${MAX_FILE_SIZE_TO_UPLOAD}
       - S3_REGION=${S3_REGION}
       - S3_BUCKET=${S3_BUCKET}
       - S3_USER_PROFILE_PHOTO_UPLOAD_PATH=${S3_USER_PROFILE_PHOTO_UPLOAD_PATH}
-      - MAX_FILE_SIZE_TO_UPLOAD=${MAX_FILE_SIZE_TO_UPLOAD}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
