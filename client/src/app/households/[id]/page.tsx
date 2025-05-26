@@ -3,17 +3,27 @@ import { API_CONFIG } from "@/config/constants";
 import { HouseholdDetails } from "@/components/household-details";
 
 async function getHousehold(id: string): Promise<Household> {
-  const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${id}`, {
-    cache: "no-store",
-    next: { revalidate: 0 },
-  });
+  try {
+    const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${id}`, {
+      cache: "no-store",
+      next: { revalidate: 0 },
+    });
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch household");
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.error || `Failed to fetch household: ${response.status}`);
+    }
+
+    const { data } = await response.json();
+    if (!data || typeof data !== 'object') {
+      throw new Error("Invalid response format: expected a household object");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching household:", error);
+    throw error;
   }
-
-  const data = await response.json();
-  return data.data;
 }
 
 interface PageProps {

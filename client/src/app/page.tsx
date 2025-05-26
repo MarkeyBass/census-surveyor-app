@@ -25,19 +25,29 @@ async function getHouseholds(): Promise<Household[]> {
    */
   // throw new Error('test error');
 
-  const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}`, {
-    // This ensures the request is not cached
-    cache: "no-store",
-    // This ensures we get fresh data on each request
-    next: { revalidate: 0 },
-  });
+  try {
+    const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}`, {
+      // This ensures the request is not cached
+      cache: "no-store",
+      // This ensures we get fresh data on each request
+      next: { revalidate: 0 },
+    });
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch households");
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.error || `Failed to fetch households: ${response.status}`);
+    }
+
+    const { data } = await response.json();
+    if (!Array.isArray(data)) {
+      throw new Error("Invalid response format: expected an array of households");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching households:", error);
+    throw error;
   }
-
-  const data = await response.json();
-  return data.data;
 }
 
 async function Households() {
