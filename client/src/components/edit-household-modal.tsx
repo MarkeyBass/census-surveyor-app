@@ -22,6 +22,7 @@ import { ZodError } from "zod";
 import { CheckedState } from "@radix-ui/react-checkbox";
 import { FamilyMembersForm } from "./family-members-form";
 import { format } from "date-fns";
+import { PhotoUpload } from "./photo-upload";
 
 interface EditHouseholdModalProps {
   household: Household;
@@ -37,6 +38,7 @@ interface FormData {
   focalPoint: {
     firstName: string;
     email: string;
+    pictureUrl?: string;
   };
   numberOfCars: number;
   hasPets: boolean;
@@ -404,6 +406,20 @@ export function EditHouseholdModal({
                 />
               </div>
             </div>
+
+            <PhotoUpload
+              currentPhotoUrl={household.focalPoint.pictureUrl}
+              householdId={household._id}
+              onPhotoUpdate={(newPhotoUrl) => {
+                setFormData(prev => ({
+                  ...prev,
+                  focalPoint: {
+                    ...prev.focalPoint,
+                    pictureUrl: newPhotoUrl
+                  }
+                }));
+              }}
+            />
           </div>
 
           <Separator />
