@@ -10,7 +10,7 @@ export const focalPointSchema = z.object({
 export const familyMemberSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  birthDate: z.string().min(1, "Birth date is required"),
+  birthDate: z.date().or(z.string().min(1, "Birth date is required")),
 });
 
 export const housingTypeSchema = z.object({

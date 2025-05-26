@@ -20,6 +20,8 @@ import { Separator } from "./ui/separator";
 import { surveyCompletionSchema, householdUpdateSchema } from "@/lib/validations/household";
 import { ZodError } from "zod";
 import { CheckedState } from "@radix-ui/react-checkbox";
+import { FamilyMembersForm } from "./family-members-form";
+import { format } from "date-fns";
 
 interface EditHouseholdModalProps {
   household: Household;
@@ -44,6 +46,11 @@ interface FormData {
     customValue?: string;
   };
   environmentalPractices: EnvironmentalPracticeEnum[];
+  familyMembers: {
+    firstName: string;
+    lastName: string;
+    birthDate: Date;
+  }[];
 }
 
 interface FieldErrors {
@@ -74,6 +81,11 @@ export function EditHouseholdModal({
     environmentalPractices: Array.isArray(household?.environmentalPractices)
       ? household?.environmentalPractices
       : [],
+    familyMembers: household.familyMembers.map((member) => ({
+      firstName: member.firstName,
+      lastName: member.lastName,
+      birthDate: new Date(member.birthDate),
+    })),
   });
 
   const validateField = (field: string, value: any, isBlur: boolean = false) => {
@@ -164,18 +176,18 @@ export function EditHouseholdModal({
     }
   };
 
-  const handleSave = async (mode: 'save' | 'complete') => {
+  const handleSave = async (mode: "save" | "complete") => {
     setIsLoading(true);
 
     try {
       // Validate based on mode
-      if (mode === 'complete') {
+      if (mode === "complete") {
         const { isValid, errors } = validateSurveyCompletion();
         if (!isValid) {
           throw new Error(
             `Cannot complete survey. Please fix the following issues:\n${errors
-              .map(err => `${err.path}: ${err.message}`)
-              .join('\n')}`
+              .map((err) => `${err.path}: ${err.message}`)
+              .join("\n")}`
           );
         }
       } else {
@@ -183,14 +195,14 @@ export function EditHouseholdModal({
           householdUpdateSchema.parse(formData);
         } catch (error) {
           if (error instanceof ZodError) {
-            const errors = error.errors.map(err => ({
-              path: err.path.join('.'),
-              message: err.message
+            const errors = error.errors.map((err) => ({
+              path: err.path.join("."),
+              message: err.message,
             }));
             throw new Error(
               `Please fix the following issues:\n${errors
-                .map(err => `${err.path}: ${err.message}`)
-                .join('\n')}`
+                .map((err) => `${err.path}: ${err.message}`)
+                .join("\n")}`
             );
           }
           throw error;
@@ -199,7 +211,7 @@ export function EditHouseholdModal({
 
       const body = {
         ...formData,
-        ...(mode === 'complete' ? { surveyStatus: SurveyStatusEnum.COMPLETED } : {})
+        ...(mode === "complete" ? { surveyStatus: SurveyStatusEnum.COMPLETED } : {}),
       };
 
       const response = await fetch(
@@ -220,37 +232,32 @@ export function EditHouseholdModal({
       }
 
       onUpdate(data.data);
-      toast.success(
-        mode === 'complete' ? "Survey completed successfully" : "Changes saved",
-        {
-          description: (
-            <span style={{ color: "#dcfce7" }}>
-              {mode === 'complete' 
-                ? "The survey has been marked as completed."
-                : "Your changes have been saved temporarily."}
-            </span>
-          ),
-          duration: 3000,
-          style: {
-            background: "#22c55e",
-            color: "white",
-          },
-        }
-      );
-      mode === 'complete' && onClose();
+      toast.success(mode === "complete" ? "Survey completed successfully" : "Changes saved", {
+        description: (
+          <span style={{ color: "#dcfce7" }}>
+            {mode === "complete"
+              ? "The survey has been marked as completed."
+              : "Your changes have been saved temporarily."}
+          </span>
+        ),
+        duration: 3000,
+        style: {
+          background: "#22c55e",
+          color: "white",
+        },
+      });
+      mode === "complete" && onClose();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to save changes. Please try again.";
-      toast.error(
-        mode === 'complete' ? "Error completing survey" : "Error saving changes",
-        {
-          description: <span style={{ color: "#fee2e2" }}>{errorMessage}</span>,
-          duration: 5000,
-          style: {
-            background: "#ef4444",
-            color: "white",
-          },
-        }
-      );
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to save changes. Please try again.";
+      toast.error(mode === "complete" ? "Error completing survey" : "Error saving changes", {
+        description: <span style={{ color: "#fee2e2" }}>{errorMessage}</span>,
+        duration: 5000,
+        style: {
+          background: "#ef4444",
+          color: "white",
+        },
+      });
     } finally {
       setIsLoading(false);
     }
@@ -258,7 +265,7 @@ export function EditHouseholdModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleSave('complete');
+    handleSave("complete");
   };
 
   const handleEnvironmentalPracticeChange = (
@@ -401,6 +408,34 @@ export function EditHouseholdModal({
 
           <Separator />
 
+          {/* Family Members Section */}
+          <div className="space-y-4">
+            <FamilyMembersForm
+              members={formData.familyMembers.map((member) => ({
+                firstName: member.firstName,
+                lastName: member.lastName,
+                birthDate:
+                  member.birthDate instanceof Date && !isNaN(member.birthDate.getTime())
+                    ? format(member.birthDate, "yyyy-MM-dd")
+                    : "",
+              }))}
+              onChange={(members) => {
+                setFormData((prev) => ({
+                  ...prev,
+                  familyMembers: members.map((member) => ({
+                    ...member,
+                    birthDate: member.birthDate ? new Date(member.birthDate) : new Date(),
+                  })),
+                }));
+              }}
+              onBlur={handleFieldBlur}
+              errors={fieldErrors}
+              touched={touchedFields}
+            />
+          </div>
+
+          <Separator />
+
           {/* Housing Information Section */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Housing Information</h3>
@@ -423,7 +458,7 @@ export function EditHouseholdModal({
               <div className="space-y-2">
                 <Label htmlFor="housingType">Housing Type</Label>
                 <Select value={formData.housingType.value} onValueChange={handleHousingTypeChange}>
-                  <SelectTrigger>
+                  <SelectTrigger className="cursor-pointer">
                     <SelectValue placeholder="Select housing type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -465,6 +500,7 @@ export function EditHouseholdModal({
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
                 <Switch
+                  className="cursor-pointer"
                   id="hasPets"
                   checked={formData.hasPets}
                   onCheckedChange={(checked: boolean) => {
@@ -521,18 +557,19 @@ export function EditHouseholdModal({
           <Separator />
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button className="cursor-pointer" type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => handleSave('save')}
+            <Button
+              className="cursor-pointer"
+              type="button"
+              variant="outline"
+              onClick={() => handleSave("save")}
               disabled={isLoading}
             >
               Save Changes
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button className="cursor-pointer" type="submit" disabled={isLoading}>
               {isLoading ? "Submitting..." : "Complete Survey"}
             </Button>
           </div>
