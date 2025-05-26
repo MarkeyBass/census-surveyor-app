@@ -1,9 +1,14 @@
 "use client";
 import Image from "next/image";
-import Link from "next/link";
 import { ModeToggle } from "./theme-toggler";
+import { Button } from "./ui/button";
+import { Plus } from "lucide-react";
+import { CreateSurveyModal } from "./create-survey-modal";
+import { useState } from "react";
 
 export default function NavBar() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background">
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -26,6 +31,15 @@ export default function NavBar() {
             className="flex items-center justify-center gap-3 flex-shrink-0"
             id="clerk-user-container"
           >
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2"
+              onClick={() => setIsModalOpen(true)}
+            >
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">Create Survey</span>
+            </Button>
             <span className="flex items-center"></span>
             <span className="mx-1">
               <ModeToggle />
@@ -33,6 +47,10 @@ export default function NavBar() {
           </div>
         </div>
       </div>
+      <CreateSurveyModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </nav>
   );
 }

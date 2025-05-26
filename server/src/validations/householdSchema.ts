@@ -123,7 +123,6 @@ export const householdCreateSchema = z.object({
   focalPoint: z.object({
     email: z.string().email("Invalid email address").max(100, "Email is too long"),
   }),
-  surveyStatus: z.literal(SurveyStatusEnum.PENDING).default(SurveyStatusEnum.PENDING),
 });
 
 // Validation middleware
