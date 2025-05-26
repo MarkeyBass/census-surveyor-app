@@ -164,24 +164,42 @@ export function EditHouseholdModal({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async (mode: 'save' | 'complete') => {
     setIsLoading(true);
 
     try {
-      // Validate the entire form
-      const { isValid, errors } = validateSurveyCompletion();
-      if (!isValid) {
-        throw new Error(
-          `Cannot complete survey. Please fix the following issues:\n${errors
-            .map((err) => `${err.path}: ${err.message}`)
-            .join("\n")}`
-        );
+      // Validate based on mode
+      if (mode === 'complete') {
+        const { isValid, errors } = validateSurveyCompletion();
+        if (!isValid) {
+          throw new Error(
+            `Cannot complete survey. Please fix the following issues:\n${errors
+              .map(err => `${err.path}: ${err.message}`)
+              .join('\n')}`
+          );
+        }
+      } else {
+        try {
+          householdUpdateSchema.parse(formData);
+        } catch (error) {
+          if (error instanceof ZodError) {
+            const errors = error.errors.map(err => ({
+              path: err.path.join('.'),
+              message: err.message
+            }));
+            throw new Error(
+              `Please fix the following issues:\n${errors
+                .map(err => `${err.path}: ${err.message}`)
+                .join('\n')}`
+            );
+          }
+          throw error;
+        }
       }
 
       const body = {
         ...formData,
-        surveyStatus: SurveyStatusEnum.COMPLETED,
+        ...(mode === 'complete' ? { surveyStatus: SurveyStatusEnum.COMPLETED } : {})
       };
 
       const response = await fetch(
@@ -202,92 +220,45 @@ export function EditHouseholdModal({
       }
 
       onUpdate(data.data);
-      toast.success("Household updated successfully", {
-        description: <span style={{ color: "#dcfce7" }}>Your changes have been saved.</span>,
-        duration: 3000,
-        style: {
-          background: "#22c55e",
-          color: "white",
-        },
-      });
-      onClose();
+      toast.success(
+        mode === 'complete' ? "Survey completed successfully" : "Changes saved",
+        {
+          description: (
+            <span style={{ color: "#dcfce7" }}>
+              {mode === 'complete' 
+                ? "The survey has been marked as completed."
+                : "Your changes have been saved temporarily."}
+            </span>
+          ),
+          duration: 3000,
+          style: {
+            background: "#22c55e",
+            color: "white",
+          },
+        }
+      );
+      mode === 'complete' && onClose();
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to update household. Please try again.";
-      toast.error("Error updating household", {
-        description: <span style={{ color: "#fee2e2" }}>{errorMessage}</span>,
-        duration: 5000,
-        style: {
-          background: "#ef4444",
-          color: "white",
-        },
-      });
+      const errorMessage = error instanceof Error ? error.message : "Failed to save changes. Please try again.";
+      toast.error(
+        mode === 'complete' ? "Error completing survey" : "Error saving changes",
+        {
+          description: <span style={{ color: "#fee2e2" }}>{errorMessage}</span>,
+          duration: 5000,
+          style: {
+            background: "#ef4444",
+            color: "white",
+          },
+        }
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSaveChanges = async () => {
-    setIsLoading(true);
-
-    try {
-      // Basic validation using householdUpdateSchema
-      try {
-        householdUpdateSchema.parse(formData);
-      } catch (error) {
-        if (error instanceof ZodError) {
-          const errors = error.errors.map(err => ({
-            path: err.path.join('.'),
-            message: err.message
-          }));
-          throw new Error(
-            `Please fix the following issues:\n${errors
-              .map(err => `${err.path}: ${err.message}`)
-              .join('\n')}`
-          );
-        }
-        throw error;
-      }
-
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${household._id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || `HTTP error! status: ${response.status}`);
-      }
-
-      onUpdate(data.data);
-      toast.success("Changes saved", {
-        description: <span style={{ color: "#dcfce7" }}>Your changes have been saved temporarily.</span>,
-        duration: 3000,
-        style: {
-          background: "#22c55e",
-          color: "white",
-        },
-      });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to save changes. Please try again.";
-      toast.error("Error saving changes", {
-        description: <span style={{ color: "#fee2e2" }}>{errorMessage}</span>,
-        duration: 5000,
-        style: {
-          background: "#ef4444",
-          color: "white",
-        },
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSave('complete');
   };
 
   const handleEnvironmentalPracticeChange = (
@@ -580,7 +551,7 @@ export function EditHouseholdModal({
             <Button 
               type="button" 
               variant="outline" 
-              onClick={handleSaveChanges}
+              onClick={() => handleSave('save')}
               disabled={isLoading}
             >
               Save Changes
