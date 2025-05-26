@@ -16,8 +16,15 @@ async function getHousehold(id: string): Promise<Household> {
   return data.data;
 }
 
-export default async function HouseholdPage({ params }: { params: { id: string } }) {
-  const household = await getHousehold(params.id);
+interface PageProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export default async function HouseholdPage({ params }: PageProps) {
+  const resolvedParams = await params;
+  const household = await getHousehold(resolvedParams.id);
 
   return (
     <main className="container mx-auto px-4 py-8">
