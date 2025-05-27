@@ -16,7 +16,24 @@ dotenv.config({ path: "./src/config/config.env" });
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      process.env.CLIENT_URL ?? "http://localhost:3000",
+      "http://localhost:3000",
+      "http://client:3000",
+      "http://markeybass.net:3000",
+      "https://markeybass.net:3000",
+      "http://markeybass.net",
+      "https://markeybass.net",
+      "http://127.0.0.1:3000",
+      "https://127.0.0.1:3000",
+      "http://35.165.203.90:3000",
+      "https://35.165.203.90:3000",
+    ],
+    credentials: true,
+  })
+);
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());

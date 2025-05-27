@@ -27,6 +27,7 @@ services:
       - MONGODB_URI=${MONGODB_URI}
       - PORT=${PORT:-8000}
       - NODE_ENV=${NODE_ENV:-development}
+      - CLIENT_URL=${CLIENT_URL}
       - MAX_FILE_SIZE_TO_UPLOAD=${MAX_FILE_SIZE_TO_UPLOAD}
       - S3_REGION=${S3_REGION}
       - S3_BUCKET=${S3_BUCKET}

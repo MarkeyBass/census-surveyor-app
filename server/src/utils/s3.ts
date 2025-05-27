@@ -115,8 +115,8 @@ export const uploadPhotoToS3 = async <T extends Document>({
 
   // Check if photo was saved on same S3 environment as the NODE_ENV before deleting the saved object
   const environmentMatchingMap = {
-    production: "prod-census-surveyor-0",
-    staging: "staging-census-surveyor-0",
+    production: "dev-census-surveyor-0",
+    staging: "dev-census-surveyor-0",
     development: "dev-census-surveyor-0",
   };
   const isBucketAndEC2EnvMatch =
