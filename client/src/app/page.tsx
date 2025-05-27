@@ -33,6 +33,8 @@ async function getHouseholds(): Promise<Household[]> {
       next: { revalidate: 0 },
     });
 
+    console.log("===== API_CONFIG.BASE_URL ===== ", API_CONFIG.BASE_URL)
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
       throw new Error(errorData?.error || `Failed to fetch households: ${response.status}`);

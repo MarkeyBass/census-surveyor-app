@@ -20,6 +20,8 @@ app.use(
   cors({
     origin: [
       process.env.CLIENT_URL ?? "http://localhost:3000",
+      process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1",
+      "localhost:8000",
       "http://localhost:3000",
       "http://client:3000",
       "http://markeybass.net:3000",

@@ -12,3 +12,6 @@ export const API_CONFIG = {
     // Add other endpoints here
   }
 } as const; 
+
+console.log("API_CONFIG.BASE_URL",API_CONFIG.BASE_URL);
+console.log("process.env.NEXT_PUBLIC_API_URL",process.env.NEXT_PUBLIC_API_URL);
