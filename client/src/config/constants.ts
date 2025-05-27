@@ -11,7 +11,9 @@ export const API_CONFIG = {
     HOUSEHOLDS: '/households',
     // Add other endpoints here
   }
-} as const; 
+} as const;
 
-console.log("API_CONFIG.BASE_URL",API_CONFIG.BASE_URL);
-console.log("process.env.NEXT_PUBLIC_API_URL",process.env.NEXT_PUBLIC_API_URL);
+// TODO: remove this
+  console.log('===== API_CONFIG.BASE_URL ===== ', API_CONFIG.BASE_URL);
+  console.log('===== process.env.NEXT_PUBLIC_API_URL ===== ', process.env.NEXT_PUBLIC_API_URL);
+  console.log('===== NODE_ENV ===== ', process.env.NODE_ENV);

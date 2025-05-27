@@ -13,6 +13,10 @@ RUN npm install
 # Copy the rest of the application
 COPY . .
 
+# Set build-time environment variables
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 # Build the application
 RUN npm run build
 
@@ -21,8 +25,6 @@ FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# Set environment to production
-ENV NODE_ENV=production
 
 # Copy necessary files from builder
 COPY --from=builder /app/package*.json ./

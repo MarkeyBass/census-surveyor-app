@@ -22,7 +22,7 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 # Set environment to production
-ENV NODE_ENV=production
+ENV NODE_ENV=$NODE_ENV
 
 # Copy necessary files from builder
 COPY --from=builder /app/package*.json ./
