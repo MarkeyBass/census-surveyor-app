@@ -33,9 +33,6 @@ async function getHouseholds(): Promise<Household[]> {
       next: { revalidate: 0 },
     });
 
-    // TODO: remove this
-    console.log("===== API_CONFIG.BASE_URL ===== ", API_CONFIG.BASE_URL)
-    console.log("===== NODE_ENV ===== ", process.env.NODE_ENV)
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);

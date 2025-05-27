@@ -1,4 +1,3 @@
-// TODO: check!!!
 export enum HousingTypeEnum {
   APARTMENT = "Apartment",
   HOUSE = "House",
