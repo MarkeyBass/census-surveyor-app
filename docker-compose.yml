@@ -4,7 +4,7 @@ services:
       context: ./client
       dockerfile: Dockerfile
     # image: markeybass/census-surveyor-client:latest
-    image: ${DOCKERHUB_USERNAME}/census-surveyor-client:${TAG:-latest}
+    # image: ${DOCKERHUB_USERNAME}/census-surveyor-client:${TAG:-latest}
     ports:
       - "3000:3000"
     environment:
@@ -18,7 +18,7 @@ services:
       context: ./server
       dockerfile: Dockerfile
     # image: markeybass/census-surveyor-server:latest
-    image: ${DOCKERHUB_USERNAME}/census-surveyor-server:${TAG:-latest}
+    # image: ${DOCKERHUB_USERNAME}/census-surveyor-server:${TAG:-latest}
     ports:
       - "8000:8000"
     environment:
