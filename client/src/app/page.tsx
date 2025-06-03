@@ -27,10 +27,8 @@ async function getHouseholds(): Promise<Household[]> {
 
   try {
     const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}`, {
-      // This ensures the request is not cached
-      cache: "no-store",
-      // This ensures we get fresh data on each request
-      next: { revalidate: 0 },
+      // Use a reasonable revalidation time instead of 0
+      next: { revalidate: 3600 }, // Revalidate every hour
     });
 
 

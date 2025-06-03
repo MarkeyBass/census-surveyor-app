@@ -5,8 +5,7 @@ import { HouseholdDetails } from "@/components/household-details";
 async function getHousehold(id: string): Promise<Household> {
   try {
     const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${id}`, {
-      cache: "no-store",
-      next: { revalidate: 0 },
+      next: { revalidate: 3600 },
     });
 
     if (!response.ok) {
