@@ -71,3 +71,5 @@ next-env.d.ts
 # Reference folder
 server-ref/
 todos.md
+
+backlog/
