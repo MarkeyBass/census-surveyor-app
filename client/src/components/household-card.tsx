@@ -56,9 +56,11 @@ export function HouseholdCard({ household, onClick }: HouseholdCardProps) {
               <span>First Name:</span>
               <span className="font-medium">{household.focalPoint.firstName || "N/A"}</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>Email:</span>
-              <span className="font-medium">{household.focalPoint.email}</span>
+            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              <span>
+                <span className="hidden sm:inline">Email: </span>
+                <span className="font-medium">{household.focalPoint.email}</span>
+              </span>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -72,7 +74,7 @@ export function HouseholdCard({ household, onClick }: HouseholdCardProps) {
                       }}
                     >
                       <Pencil className="h-3 w-3" />
-                      <span>Edit</span>
+                      <span className="hidden sm:inline">Edit</span>
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>

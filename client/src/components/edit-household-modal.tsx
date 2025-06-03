@@ -267,6 +267,7 @@ export function EditHouseholdModal({
     }
   };
 
+  // submit - means complete is complete
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     handleSave("complete");
