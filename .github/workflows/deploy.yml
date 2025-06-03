@@ -12,8 +12,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Deploy to EC2
-        run: |
-          ssh -o StrictHostKeyChecking=no -i "${{ secrets.SSH_PRIVATE_KEY }}" ubuntu@app.markeybass.net '
+        uses: appleboy/ssh-action@master
+        with:
+          host: app.markeybass.net
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
             cd census-surveyor-app || mkdir census-surveyor-app
             cd census-surveyor-app
             git clone https://github.com/${{ github.repository }}.git . || git pull origin main
@@ -36,4 +40,3 @@ jobs:
             docker compose down -v
             docker system prune -f
             docker compose up --build -d
-          '
