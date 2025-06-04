@@ -26,11 +26,12 @@ async function getHouseholds(): Promise<Household[]> {
   // throw new Error('test error');
 
   try {
-    const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}`, {
-      // Use a reasonable revalidation time instead of 0
-      next: { revalidate: 3600 }, // Revalidate every hour
-    });
 
+    const url = process.env.NODE_ENV === "development" ? `${API_CONFIG.SERVER_COMPONENTS_BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}` : `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}`;
+    console.log("url", url, "NODE_ENV", process.env.NODE_ENV);
+    const response = await fetch(url, {
+      next: { revalidate: 3600 },
+    });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);

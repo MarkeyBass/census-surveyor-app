@@ -4,7 +4,12 @@ import { HouseholdDetails } from "@/components/household-details";
 
 async function getHousehold(id: string): Promise<Household> {
   try {
-    const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${id}`, {
+    const url =
+      process.env.NODE_ENV === "development"
+        ? `${API_CONFIG.SERVER_COMPONENTS_BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${id}`
+        : `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${id}`;
+
+    const response = await fetch(url, {
       next: { revalidate: 3600 },
     });
 
@@ -14,7 +19,7 @@ async function getHousehold(id: string): Promise<Household> {
     }
 
     const { data } = await response.json();
-    if (!data || typeof data !== 'object') {
+    if (!data || typeof data !== "object") {
       throw new Error("Invalid response format: expected a household object");
     }
 

@@ -36,18 +36,21 @@ export function AdminEmailUpdateModal({
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${household._id}/admin-update`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          focalPoint: {
-            ...household.focalPoint,
-            email,
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${household._id}/admin-update`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
           },
-        }),
-      });
+          body: JSON.stringify({
+            focalPoint: {
+              ...household.focalPoint,
+              email,
+            },
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to update email");
@@ -84,10 +87,15 @@ export function AdminEmailUpdateModal({
             />
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="hover:cursor-pointer"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} className="hover:cursor-pointer">
               {isLoading ? "Updating..." : "Update Email"}
             </Button>
           </DialogFooter>
@@ -95,4 +103,4 @@ export function AdminEmailUpdateModal({
       </DialogContent>
     </Dialog>
   );
-} 
+}

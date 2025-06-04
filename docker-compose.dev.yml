@@ -1,14 +1,21 @@
+# docker-compose.dev.yml
 services:
   client:
     build:
       context: ./client
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
       args:
-        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+        - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+      - /app/.next
     depends_on:
       - server
 
@@ -20,14 +27,18 @@ services:
       - "8000:8000"
     environment:
       - MONGODB_URI=${MONGODB_URI}
-      - PORT=${PORT:-8000}
-      - NODE_ENV=${NODE_ENV:-development}
-      - CLIENT_URL=${CLIENT_URL}
+      - PORT=8000
+      - NODE_ENV=development
+      - CLIENT_URL=http://localhost:3000
       - MAX_FILE_SIZE_TO_UPLOAD=${MAX_FILE_SIZE_TO_UPLOAD}
       - S3_REGION=${S3_REGION}
       - S3_BUCKET=${S3_BUCKET}
       - S3_USER_PROFILE_PHOTO_UPLOAD_PATH=${S3_USER_PROFILE_PHOTO_UPLOAD_PATH}
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+      - /app/dist
     extra_hosts:
       - "host.docker.internal:host-gateway"
