@@ -6,10 +6,10 @@ import Loading from "./loading";
 import { API_CONFIG } from "@/config/constants";
 import HouseholdsHeader from "@/components/households-header";
 
-async function getHouseholds(): Promise<Household[]> {
-  // During build time, return an empty array to prevent build failures
-  if (process.env.NODE_ENV === 'production' && typeof window === 'undefined') {
-    return [];
+async function getHouseholds(): Promise<Household[] | null> {
+  // Only return null during build time, not during runtime
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return null;
   }
 
   /**
@@ -56,7 +56,7 @@ async function getHouseholds(): Promise<Household[]> {
 
 async function Households() {
   const households = await getHouseholds();
-  return <HouseholdList households={households} />;
+  return households ? <HouseholdList households={households} /> : null;
 }
 
 export default function Home() {

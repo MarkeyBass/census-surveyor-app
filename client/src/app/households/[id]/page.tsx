@@ -2,23 +2,10 @@ import { Household, SurveyStatusEnum } from "@/types/household";
 import { API_CONFIG } from "@/config/constants";
 import { HouseholdDetails } from "@/components/household-details";
 
-async function getHousehold(id: string): Promise<Household> {
-  // During build time, return a mock household to prevent build failures
-  if (process.env.NODE_ENV === 'production' && typeof window === 'undefined') {
-    return {
-      _id: '',
-      slug: '',
-      familyName: '',
-      address: '',
-      surveyStatus: SurveyStatusEnum.PENDING,
-      dateSurveyed: null,
-      focalPoint: {
-        email: '',
-      },
-      familyMembers: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+async function getHousehold(id: string): Promise<Household | null> {
+  // Only return mock data during build time, not during runtime
+  if (process.env.NEXT_PHASE === "phase-production-build") {
+    return null;
   }
 
   try {
@@ -58,9 +45,9 @@ export default async function HouseholdPage({ params }: PageProps) {
   const resolvedParams = await params;
   const household = await getHousehold(resolvedParams.id);
 
-  return (
+  return household ? (
     <main className="container mx-auto px-4 py-8">
       <HouseholdDetails household={household} />
     </main>
-  );
+  ) : null;
 }
