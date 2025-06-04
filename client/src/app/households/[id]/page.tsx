@@ -9,7 +9,7 @@ async function getHousehold(id: string): Promise<Household> {
         ? `${API_CONFIG.SERVER_COMPONENTS_BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${id}`
         : `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${id}`;
 
-    const response = await fetch(url, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${id}`, {
       next: { revalidate: 3600 },
     });
 

@@ -29,7 +29,7 @@ async function getHouseholds(): Promise<Household[]> {
 
     const url = process.env.NODE_ENV === "development" ? `${API_CONFIG.SERVER_COMPONENTS_BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}` : `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}`;
     console.log("url", url, "NODE_ENV", process.env.NODE_ENV);
-    const response = await fetch(url, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}`, {
       next: { revalidate: 3600 },
     });
 
