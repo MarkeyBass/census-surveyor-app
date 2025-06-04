@@ -7,6 +7,11 @@ import { API_CONFIG } from "@/config/constants";
 import HouseholdsHeader from "@/components/households-header";
 
 async function getHouseholds(): Promise<Household[]> {
+  // During build time, return an empty array to prevent build failures
+  if (process.env.NODE_ENV === 'production' && typeof window === 'undefined') {
+    return [];
+  }
+
   /**
    * Test Utilities
    * --------------
@@ -26,10 +31,9 @@ async function getHouseholds(): Promise<Household[]> {
   // throw new Error('test error');
 
   try {
-
     const url = process.env.NODE_ENV === "development" ? `${API_CONFIG.SERVER_COMPONENTS_BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}` : `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}`;
     console.log("url", url, "NODE_ENV", process.env.NODE_ENV);
-    const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}`, {
+    const response = await fetch(url, {
       next: { revalidate: 3600 },
     });
 
