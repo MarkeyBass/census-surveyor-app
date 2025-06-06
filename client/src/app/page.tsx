@@ -5,12 +5,9 @@ import { HouseholdList } from "@/components/household-list";
 import Loading from "./loading";
 import { API_CONFIG } from "@/config/constants";
 import HouseholdsHeader from "@/components/households-header";
+import { getBaseUrl } from "@/lib/get-base-url";
 
-async function getHouseholds(): Promise<Household[] | null> {
-  // Only return null during build time, not during runtime
-  if (process.env.NEXT_PHASE === 'phase-production-build') {
-    return null;
-  }
+async function getHouseholds(): Promise<Household[]> {
 
   /**
    * Test Utilities
@@ -31,10 +28,9 @@ async function getHouseholds(): Promise<Household[] | null> {
   // throw new Error('test error');
 
   try {
-    const url = process.env.NODE_ENV === "development" ? `${API_CONFIG.SERVER_COMPONENTS_BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}` : `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}`;
-    console.log("url", url, "NODE_ENV", process.env.NODE_ENV);
+    const url = getBaseUrl() + API_CONFIG.ENDPOINTS.HOUSEHOLDS;
     const response = await fetch(url, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 0 },
     });
 
     if (!response.ok) {
@@ -56,7 +52,7 @@ async function getHouseholds(): Promise<Household[] | null> {
 
 async function Households() {
   const households = await getHouseholds();
-  return households ? <HouseholdList households={households} /> : null;
+  return <HouseholdList households={households} />;
 }
 
 export default function Home() {

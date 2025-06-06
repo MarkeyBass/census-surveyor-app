@@ -17,12 +17,15 @@ const nextConfig = {
     domains: ['census-surveyor.s3.amazonaws.com'],
   },
   // This ensures the environment variable is available at build time
-  env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-  },
-  // This ensures the environment variable is available at runtime
-  publicRuntimeConfig: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  // env: {
+  //   NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  // },
+  // // This ensures the environment variable is available at runtime
+  // publicRuntimeConfig: {
+  //   NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  // },
+  experimental: {
+    turbo: false,
   },
 };
 

@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { User, Users, Pencil } from "lucide-react";
 import { API_CONFIG } from "@/config/constants";
 import { toast } from "sonner";
+import { getBaseUrl } from "@/lib/get-base-url";
 
 interface HouseholdDetailsProps {
   household: Household;
@@ -23,11 +24,13 @@ export function HouseholdDetails({ household: initialHousehold }: HouseholdDetai
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
 
+  const baseUrl = getBaseUrl();
+
   const refetchHousehold = async () => {
     setIsRefetching(true);
     try {
       const response = await fetch(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${household._id}`
+        `${baseUrl}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${household._id}`
       );
       
       if (!response.ok) {

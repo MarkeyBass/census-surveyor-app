@@ -7,6 +7,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { toast } from "sonner";
 import { API_CONFIG } from "@/config/constants";
+import { getBaseUrl } from "@/lib/get-base-url";
 
 interface CreateSurveyModalProps {
   isOpen: boolean;
@@ -23,12 +24,14 @@ export function CreateSurveyModal({ isOpen, onClose }: CreateSurveyModalProps) {
     },
   });
 
+  const baseUrl = getBaseUrl();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}`, {
+      const response = await fetch(`${baseUrl}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,21 +1,13 @@
 import { Household, SurveyStatusEnum } from "@/types/household";
 import { API_CONFIG } from "@/config/constants";
 import { HouseholdDetails } from "@/components/household-details";
+import { getBaseUrl } from "@/lib/get-base-url";
 
-async function getHousehold(id: string): Promise<Household | null> {
-  // Only return mock data during build time, not during runtime
-  if (process.env.NEXT_PHASE === "phase-production-build") {
-    return null;
-  }
-
+async function getHousehold(id: string): Promise<Household> {
   try {
-    const url =
-      process.env.NODE_ENV === "development"
-        ? `${API_CONFIG.SERVER_COMPONENTS_BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${id}`
-        : `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${id}`;
-
+    let url = getBaseUrl() + API_CONFIG.ENDPOINTS.HOUSEHOLDS + "/" + id;
     const response = await fetch(url, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 0 },
     });
 
     if (!response.ok) {
@@ -45,9 +37,9 @@ export default async function HouseholdPage({ params }: PageProps) {
   const resolvedParams = await params;
   const household = await getHousehold(resolvedParams.id);
 
-  return household ? (
+  return (
     <main className="container mx-auto px-4 py-8">
       <HouseholdDetails household={household} />
     </main>
-  ) : null;
+  );
 }

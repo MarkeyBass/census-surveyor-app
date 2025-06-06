@@ -12,11 +12,19 @@ RUN npm install
 # Copy the rest of the application
 COPY . .
 
-# Set build-time environment variables
-ARG NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-ENV WATCHPACK_POLLING=true
-ENV CHOKIDAR_USEPOLLING=true
+# # Set build-time environment variables (Kept commented out for none docker-compose usage)
+# ARG NEXT_PUBLIC_API_URL
+# ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+# ARG NEXT_PUBLIC_APP_ENV
+# ENV NEXT_PUBLIC_APP_ENV=$NEXT_PUBLIC_APP_ENV
+# ENV WATCHPACK_POLLING=true
+# ENV CHOKIDAR_USEPOLLING=true
+
+# Without docker-compose: uncomment these lines above and use --build-arg when building:
+# docker build \
+# --build-arg NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1 \
+# --build-arg NEXT_PUBLIC_APP_ENV=development \
+# -f Dockerfile.dev .
 
 EXPOSE 3000
 

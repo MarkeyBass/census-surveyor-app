@@ -7,7 +7,7 @@ import {
   EnvironmentalPracticeEnum,
   SurveyStatusEnum,
 } from "@/types/household";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -23,6 +23,7 @@ import { CheckedState } from "@radix-ui/react-checkbox";
 import { FamilyMembersForm } from "./family-members-form";
 import { format } from "date-fns";
 import { PhotoUpload } from "./photo-upload";
+import { getBaseUrl } from "@/lib/get-base-url";
 
 interface EditHouseholdModalProps {
   household: Household;
@@ -65,6 +66,7 @@ export function EditHouseholdModal({
   onClose,
   onUpdate,
 }: EditHouseholdModalProps) {
+  const baseUrl = getBaseUrl();
   const [isLoading, setIsLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
@@ -219,7 +221,7 @@ export function EditHouseholdModal({
       };
 
       const response = await fetch(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${household._id}`,
+        `${baseUrl}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${household._id}`,
         {
           method: "PUT",
           headers: {
@@ -343,6 +345,9 @@ export function EditHouseholdModal({
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Edit Household</DialogTitle>
+          <DialogDescription>
+            Update household information and complete the survey.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-8" noValidate>
           {/* Basic Information Section */}
@@ -477,7 +482,7 @@ export function EditHouseholdModal({
               <div className="space-y-2">
                 <Label htmlFor="housingType">Housing Type</Label>
                 <Select value={formData.housingType.value} onValueChange={handleHousingTypeChange}>
-                  <SelectTrigger className="cursor-pointer">
+                  <SelectTrigger id="housingType" className="cursor-pointer">
                     <SelectValue placeholder="Select housing type" />
                   </SelectTrigger>
                   <SelectContent>

@@ -8,6 +8,7 @@ import { API_CONFIG } from "@/config/constants";
 import { Upload, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { User } from "lucide-react";
+import { getBaseUrl } from "@/lib/get-base-url";
 
 interface PhotoUploadProps {
   currentPhotoUrl?: string;
@@ -19,6 +20,8 @@ export function PhotoUpload({ currentPhotoUrl, householdId, onPhotoUpdate }: Pho
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentPhotoUrl || null);
   const [isImageLoading, setIsImageLoading] = useState(true);
+
+  const baseUrl = getBaseUrl();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -56,7 +59,7 @@ export function PhotoUpload({ currentPhotoUrl, householdId, onPhotoUpdate }: Pho
 
     try {
       const response = await fetch(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${householdId}/focal-point-photo`,
+        `${baseUrl}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${householdId}/focal-point-photo`,
         {
           method: "PUT",
           body: formData,

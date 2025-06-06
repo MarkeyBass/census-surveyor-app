@@ -8,12 +8,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { API_CONFIG } from "@/config/constants";
+import { getBaseUrl } from "@/lib/get-base-url";
 
 interface AdminEmailUpdateModalProps {
   household: Household;
@@ -35,9 +37,11 @@ export function AdminEmailUpdateModal({
     e.preventDefault();
     setIsLoading(true);
 
+    const baseUrl = getBaseUrl();
+
     try {
       const response = await fetch(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${household._id}/admin-update`,
+        `${baseUrl}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${household._id}/admin-update`,
         {
           method: "PUT",
           headers: {
@@ -51,6 +55,7 @@ export function AdminEmailUpdateModal({
           }),
         }
       );
+
 
       if (!response.ok) {
         throw new Error("Failed to update email");
@@ -73,6 +78,9 @@ export function AdminEmailUpdateModal({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Update Email</DialogTitle>
+          <DialogDescription>
+            Update the focal point's email address for this household.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
