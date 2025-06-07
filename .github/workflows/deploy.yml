@@ -30,6 +30,7 @@ jobs:
             MAX_FILE_SIZE_TO_UPLOAD=${{ secrets.MAX_FILE_SIZE_TO_UPLOAD }}
             CLIENT_URL=${{ secrets.CLIENT_URL }}
             NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_APP_ENV=${{ secrets.NEXT_PUBLIC_APP_ENV }}
             S3_REGION=${{ secrets.S3_REGION }}
             S3_BUCKET=${{ secrets.S3_BUCKET }}
             S3_USER_PROFILE_PHOTO_UPLOAD_PATH=${{ secrets.S3_USER_PROFILE_PHOTO_UPLOAD_PATH }}
