@@ -30,10 +30,10 @@ interface HouseholdCardProps {
 export function HouseholdCard({ household, onClick }: HouseholdCardProps) {
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
 
-  const handleEmailUpdate = () => {
-    // You might want to add a callback prop to handle the update in the parent component
-    window.location.reload(); // Temporary solution - refresh the page to show updated data
-  };
+  // const handleEmailUpdate = () => {
+  //   // You might want to add a callback prop to handle the update in the parent component
+  //   window.location.reload(); // Temporary solution - refresh the page to show updated data
+  // };
 
   return (
     <>
@@ -103,7 +103,7 @@ export function HouseholdCard({ household, onClick }: HouseholdCardProps) {
         household={household}
         isOpen={isEmailModalOpen}
         onClose={() => setIsEmailModalOpen(false)}
-        onUpdate={handleEmailUpdate}
+        // onUpdate={handleEmailUpdate}
       />
     </>
   );

@@ -16,22 +16,24 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { API_CONFIG } from "@/config/constants";
 import { getBaseUrl } from "@/lib/get-base-url";
+import { useRouter } from "next/navigation";
 
 interface AdminEmailUpdateModalProps {
   household: Household;
   isOpen: boolean;
   onClose: () => void;
-  onUpdate: (updatedHousehold: Household) => void;
+  // onUpdate: (updatedHousehold: Household) => void;
 }
 
 export function AdminEmailUpdateModal({
   household,
   isOpen,
   onClose,
-  onUpdate,
+  // onUpdate,
 }: AdminEmailUpdateModalProps) {
   const [email, setEmail] = useState(household.focalPoint.email);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,15 +58,16 @@ export function AdminEmailUpdateModal({
         }
       );
 
-
       if (!response.ok) {
         throw new Error("Failed to update email");
       }
 
       const data = await response.json();
-      onUpdate(data.data);
+      // onUpdate(data.data);
       toast.success("Email updated successfully");
       onClose();
+      // Refresh the current route to get fresh data
+      router.refresh();
     } catch (error) {
       toast.error("Failed to update email");
       console.error(error);

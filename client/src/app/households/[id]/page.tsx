@@ -1,4 +1,4 @@
-import { Household, SurveyStatusEnum } from "@/types/household";
+import { Household } from "@/types/household";
 import { API_CONFIG } from "@/config/constants";
 import { HouseholdDetails } from "@/components/household-details";
 import { getBaseUrl } from "@/lib/get-base-url";
@@ -7,7 +7,7 @@ async function getHousehold(id: string): Promise<Household> {
   try {
     let url = getBaseUrl() + API_CONFIG.ENDPOINTS.HOUSEHOLDS + "/" + id;
     const response = await fetch(url, {
-      next: { revalidate: 0 },
+      cache: 'no-store',  // This ensures fresh data on every request
     });
 
     if (!response.ok) {

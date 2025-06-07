@@ -30,9 +30,17 @@ async function getHouseholds(): Promise<Household[]> {
     const url = getBaseUrl() + API_CONFIG.ENDPOINTS.HOUSEHOLDS;
     const response = await fetch(url, {
       cache: 'no-store',  // This ensures fresh data on every request
+      // // The Authorization header will be automatically added by the middleware
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        // Handle unauthorized access
+        throw new Error('Unauthorized access. Please log in.');
+      }
       const errorData = await response.json().catch(() => null);
       throw new Error(errorData?.error || `Failed to fetch households: ${response.status}`);
     }

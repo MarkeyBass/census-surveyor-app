@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Household } from "@/types/household";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -11,9 +11,7 @@ import { Separator } from "./ui/separator";
 import { HousingTypeEnum } from "@/types/household";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { User, Users, Pencil } from "lucide-react";
-import { API_CONFIG } from "@/config/constants";
-import { toast } from "sonner";
-import { getBaseUrl } from "@/lib/get-base-url";
+import { useRouter } from "next/navigation";
 
 interface HouseholdDetailsProps {
   household: Household;
@@ -22,30 +20,14 @@ interface HouseholdDetailsProps {
 export function HouseholdDetails({ household: initialHousehold }: HouseholdDetailsProps) {
   const [household, setHousehold] = useState(initialHousehold);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isRefetching, setIsRefetching] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
-  const baseUrl = getBaseUrl();
-
-  const refetchHousehold = async () => {
-    setIsRefetching(true);
-    try {
-      const response = await fetch(
-        `${baseUrl}${API_CONFIG.ENDPOINTS.HOUSEHOLDS}/${household._id}`
-      );
-      
-      if (!response.ok) {
-        throw new Error("Failed to fetch updated household data");
-      }
-
-      const data = await response.json();
-      setHousehold(data.data);
-    } catch (error) {
-      toast.error("Failed to refresh data", {
-        description: error instanceof Error ? error.message : "Please try again",
-      });
-    } finally {
-      setIsRefetching(false);
-    }
+  const handleUpdate = (updatedHousehold: Household) => {
+    setHousehold(updatedHousehold);
+    startTransition(() => {
+      router.refresh();
+    });
   };
 
   const getInitials = (name: string) => {
@@ -67,10 +49,12 @@ export function HouseholdDetails({ household: initialHousehold }: HouseholdDetai
           <Button 
             className="cursor-pointer gap-2" 
             onClick={() => setIsEditModalOpen(true)}
-            disabled={isRefetching}
+            disabled={isPending}
           >
             <Pencil className="h-4 w-4" />
-            <span className="hidden sm:inline">Edit Household</span>
+            <span className="hidden sm:inline">
+              {isPending ? "Refreshing..." : "Edit Household"}
+            </span>
           </Button>
         </div>
       </div>
@@ -276,10 +260,7 @@ export function HouseholdDetails({ household: initialHousehold }: HouseholdDetai
         household={household}
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        onUpdate={async (updatedHousehold) => {
-          setHousehold(updatedHousehold);
-          await refetchHousehold(); // Refetch after update
-        }}
+        onUpdate={handleUpdate}
       />
     </div>
   );
